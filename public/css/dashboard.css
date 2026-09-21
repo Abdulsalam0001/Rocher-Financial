@@ -178,3 +178,44 @@ table{max-width:100%}
 .transfer-submit{display:flex!important;justify-content:space-between;align-items:center;width:100%}.transfer-submit strong{font-size:18px;font-weight:400}
 #transferAmount{font-size:18px;font-family:Georgia,serif}
 @media(max-width:600px){.client-command{display:block;padding:30px 24px}.command-note{margin-top:24px;min-width:0}.transfer-modal-head{display:block}.transfer-secure{display:inline-block;margin-top:10px}.transfer-steps{grid-template-columns:1fr;gap:5px}.transfer-steps i{display:none}.transfer-steps span{padding:4px 0}.modal h2{font-size:30px}}
+
+/* U.S.-style retail banking visual layer */
+.client-app{background:#f4f7f9;color:#24333d}
+.client-app .dash-header{background:#fff;border-bottom:1px solid #dce4e9;box-shadow:0 1px 4px rgba(20,50,70,.05);min-height:68px;padding:0 4vw}
+.client-app .dash-header .auth-brand>span{width:40px;height:40px;background:#0b4f78;color:#fff;border:0}
+.client-nav{margin-left:24px;gap:2px;height:68px}
+.client-nav a{height:68px;display:flex;align-items:center;padding:0 14px;border:0!important;color:#60717c}
+.client-nav a.active{color:#0b4f78;box-shadow:inset 0 -3px #0b5f91;font-weight:800}
+.client-app .dash{max-width:1320px;padding:38px 4vw 80px}
+.hero-dashboard h1{font:600 clamp(32px,4vw,46px)/1.05 "DM Sans",sans-serif;color:#153f5b;letter-spacing:-.035em}
+.secure-badge{background:#fff;border:1px solid #d8e2e8;border-radius:3px}
+.wealth-card{background:linear-gradient(135deg,#0a4770,#12638d);border:0;border-radius:4px;box-shadow:0 9px 25px rgba(10,71,112,.14);min-height:230px}
+.wealth-card h2{font-family:"DM Sans",sans-serif;font-weight:500;letter-spacing:-.04em}
+.action-card{background:#fff;border:1px solid #dce4e9;border-radius:3px;box-shadow:0 2px 7px rgba(20,50,70,.03)}
+.action-card:hover{border-color:#9bb9c9;box-shadow:0 8px 20px rgba(20,50,70,.08)}
+.action-card strong{background:#edf5f9;color:#0b5f91;border-radius:3px}
+.premium-stats{gap:1px}
+.premium-stats .stat{background:#fff;border:0;border-right:1px solid #e0e6ea;min-height:92px}
+.premium-stats .stat strong{font-family:"DM Sans",sans-serif;font-size:23px;font-weight:600}
+.client-command{background:#fff;border:1px solid #dfe6eb;border-radius:4px;padding:30px}
+.client-command h2{font-family:"DM Sans",sans-serif;font-size:29px;font-weight:600}
+.client-command h2 em{color:#0b5f91}
+.network-panel{background:#eaf3f7!important;border:1px solid #d3e3eb!important;border-radius:4px;box-shadow:none}
+.network-panel h2{color:#153f5b;font-family:"DM Sans",sans-serif;font-size:28px;font-weight:600}
+.network-panel .muted{color:#60717c!important}
+.network-stats b{color:#0b5f91}
+.panel{background:#fff;border:1px solid #dfe6eb;border-radius:4px;box-shadow:0 2px 8px rgba(20,50,70,.03)}
+.panel-head h2{font-family:"DM Sans",sans-serif;font-size:24px;font-weight:600}
+.account-card{background:#fff;border:1px solid #dfe6eb;border-radius:4px}
+.account-card:hover{border-color:#abc1ce;box-shadow:0 7px 20px rgba(20,50,70,.07)}
+.account-card h3,.balance{font-family:"DM Sans",sans-serif}
+.beneficiary{background:#f8fafb;border-color:#dfe6eb;border-radius:3px}
+.beneficiary-avatar{background:#0b4f78;border-radius:3px}
+.transfer-options button{background:#f8fafb;border-color:#dce4e9;border-radius:3px}
+.transfer-options button:hover{background:#fff;border-color:#9bb9c9}
+th{background:#f5f7f9;border-top:0;color:#687984}
+td{border-top-color:#e4e9ed}
+.modal{border:1px solid #d5e0e6;border-radius:5px;box-shadow:0 24px 70px rgba(20,50,70,.2)}
+.modal h2{font-family:"DM Sans",sans-serif;font-weight:600}
+.transfer-submit{background:#0b4f78!important}
+@media(max-width:700px){.premium-stats{gap:1px}.premium-stats .stat{border-right:0;border-radius:0!important}}
