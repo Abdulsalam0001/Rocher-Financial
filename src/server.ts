@@ -198,28 +198,10 @@ app.get("/api/customer/transfer-pin", requireRole("CUSTOMER"), async (_req, res)
   });
 });
 
-app.post("/api/customer/transfer-pin", requireRole("CUSTOMER"), async (req, res) => {
+app.get("/api/customer/transfer-pin", requireRole("CUSTOMER"), async (_req, res) => {
   const session = res.locals.session as { userId: string };
-  const { pin, currentPin } = req.body as { pin?: string; currentPin?: string };
-  if (!/^\d{6}$/.test(String(pin ?? ""))) {
-    return res.status(400).json({ error: "Transfer PIN must be exactly 6 digits." });
-  }
-
-  const existing = await prisma.transferPin.findUnique({ where: { userId: session.userId } });
-  if (existing) {
-    if (!currentPin || !verifyPassword(String(currentPin), existing.pinHash)) {
-      return res.status(401).json({ error: "Current Transfer PIN is incorrect." });
-    }
-  }
-
-  await prisma.transferPin.upsert({
-    where: { userId: session.userId },
-    create: { userId: session.userId, pinHash: hashPassword(String(pin)) },
-    update: { pinHash: hashPassword(String(pin)), failedAttempts: 0, lockedUntil: null }
-  });
-  await prisma.securityEvent.create({ data: { userId: session.userId, event: existing ? "TRANSFER_PIN_CHANGED" : "TRANSFER_PIN_CREATED" } });
-  await audit(session.userId, existing ? "CHANGE_TRANSFER_PIN" : "CREATE_TRANSFER_PIN", "TRANSFER_PIN", session.userId);
-  res.json({ ok: true, message: existing ? "Transfer PIN changed successfully." : "Transfer PIN created successfully." });
+  const record = await prisma.transferPin.findUnique({ where: { userId: session.userId }, select: { id: true } });
+  res.json({ configured: Boolean(record) });
 });
 
 app.get("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (_req, res) => {
@@ -265,87 +247,34 @@ app.post("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (req, res
 
 app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) => {
   const session = res.locals.session as { userId: string };
-  const body = req.body as {
-    sourceAccountId?: string; beneficiaryId?: string; amount?: string | number;
-    transferType?: string; transferPin?: string; reference?: string;
-  };
-
-  if (!body.sourceAccountId || !body.beneficiaryId || body.amount === undefined || !body.transferPin) {
-    return res.status(400).json({ error: "Source account, beneficiary, amount and Transfer PIN are required." });
-  }
-  const transferType = String(body.transferType ?? "WIRE").toUpperCase();
-  if (!validTransferType(transferType)) return res.status(400).json({ error: "Unsupported transfer type." });
-
-  const numericAmount = Number(body.amount);
-  if (!Number.isFinite(numericAmount) || numericAmount <= 0) return res.status(400).json({ error: "Transfer amount must be greater than zero." });
-  const amountMinor = BigInt(Math.round(numericAmount * 100));
-  if (amountMinor <= 0n) return res.status(400).json({ error: "Transfer amount is too small." });
-
-  const pinRecord = await prisma.transferPin.findUnique({ where: { userId: session.userId } });
-  if (!pinRecord) return res.status(409).json({ error: "TRANSFER_PIN_NOT_SET", message: "Set your Transfer PIN before making a transfer." });
-  if (pinRecord.lockedUntil && pinRecord.lockedUntil > new Date()) {
-    return res.status(423).json({ error: "Transfer authorization is temporarily locked.", lockedUntil: pinRecord.lockedUntil });
-  }
-  if (!verifyPassword(String(body.transferPin), pinRecord.pinHash)) {
-    const failedAttempts = pinRecord.failedAttempts + 1;
-    const lockedUntil = failedAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
-    await prisma.transferPin.update({ where: { id: pinRecord.id }, data: { failedAttempts, lockedUntil } });
-    await prisma.securityEvent.create({ data: { userId: session.userId, event: "TRANSFER_PIN_FAILED", metadata: { failedAttempts } } });
-    return res.status(401).json({ error: lockedUntil ? "Too many incorrect PIN attempts. Transfers are locked for 15 minutes." : "Incorrect Transfer PIN." });
-  }
-
-  const customer = await prisma.customer.findUnique({
-    where: { userId: session.userId },
-    include: { accounts: { include: { account: true } } }
+  const body = req.body as { sourceAccountId?: string; beneficiaryId?: string; amount?: string|number; transferType?: string; transferPin?: string; reference?: string };
+  if (!body.sourceAccountId || !body.beneficiaryId || body.amount === undefined || !body.transferPin) return res.status(400).json({ error:"Source account, beneficiary, amount and Transfer PIN are required." });
+  const type=String(body.transferType??"WIRE").toUpperCase();
+  if(!validTransferType(type)) return res.status(400).json({error:"Unsupported transfer type."});
+  const amount=Number(body.amount); if(!Number.isFinite(amount)||amount<=0) return res.status(400).json({error:"Transfer amount must be greater than zero."});
+  const pin=await prisma.transferPin.findUnique({where:{userId:session.userId}});
+  if(!pin) return res.status(409).json({error:"TRANSFER_PIN_NOT_SET",message:"Your Transfer PIN has not been issued yet. Please contact customer care."});
+  if(pin.lockedUntil&&pin.lockedUntil>new Date()) return res.status(423).json({error:"Transfer authorization is temporarily locked.",lockedUntil:pin.lockedUntil});
+  if(!verifyPassword(String(body.transferPin),pin.pinHash)){const failed=pin.failedAttempts+1;const locked=failed>=5?new Date(Date.now()+15*60*1000):null;await prisma.transferPin.update({where:{id:pin.id},data:{failedAttempts:failed,lockedUntil:locked}});return res.status(401).json({error:locked?"Too many incorrect PIN attempts. Transfers are locked for 15 minutes.":"Incorrect Transfer PIN."});}
+  const customer=await prisma.customer.findUnique({where:{userId:session.userId},include:{accounts:{include:{account:true}}});
+  if(!customer)return res.status(404).json({error:"Customer not found."});
+  const source=customer.accounts.find(h=>h.account.id===body.sourceAccountId)?.account;
+  if(!source)return res.status(404).json({error:"Source account not found."});
+  if(source.status!=="ACTIVE")return res.status(400).json({error:"This account cannot make transfers."});
+  const beneficiary=await prisma.beneficiary.findFirst({where:{id:body.beneficiaryId,customerId:customer.id}});
+  if(!beneficiary)return res.status(404).json({error:"Beneficiary not found."});
+  if(beneficiary.currency!==source.currency)return res.status(400).json({error:"Transfer currency must match the selected account in this prototype."});
+  const amountMinor=BigInt(Math.round(amount*100)); if(amountMinor<=0n)return res.status(400).json({error:"Transfer amount is too small."});
+  const reference=`RM-${Date.now()}-${randomBytes(4).toString("hex").toUpperCase()}`;
+  const description=body.reference?.trim()||`${type} transfer to ${beneficiary.name}`;
+  const tx=await prisma.$transaction(async db=>{
+    const t=await db.transaction.create({data:{reference,accountId:source.id,type:"TRANSFER",status:"PROCESSING",amountMinor,currency:source.currency,description,metadata:{source:"prototype_transfer",transferType:type,beneficiaryId:beneficiary.id,beneficiary:{name:beneficiary.name,bankName:beneficiary.bankName,country:beneficiary.country,accountNumber:beneficiary.accountNumber,iban:beneficiary.iban,swiftBic:beneficiary.swiftBic}}}});
+    await db.transferPin.update({where:{id:pin.id},data:{failedAttempts:0,lockedUntil:null}});
+    return t;
   });
-  if (!customer) return res.status(404).json({ error: "Customer not found." });
-  const source = customer.accounts.find((holder) => holder.account.id === body.sourceAccountId)?.account;
-  if (!source) return res.status(404).json({ error: "Source account not found." });
-  if (source.status !== "ACTIVE") return res.status(400).json({ error: "This account cannot make transfers." });
-
-  const beneficiary = await prisma.beneficiary.findFirst({ where: { id: body.beneficiaryId, customerId: customer.id } });
-  if (!beneficiary) return res.status(404).json({ error: "Beneficiary not found." });
-  if (beneficiary.currency !== source.currency) {
-    return res.status(400).json({ error: `Transfer currency must match the selected ${source.currency} account in this prototype.` });
-  }
-
-  const reference = `RM-${Date.now()}-${randomBytes(4).toString("hex").toUpperCase()}`;
-  const description = body.reference?.trim() || `${transferType} transfer to ${beneficiary.name}`;
-
-  try {
-    await prisma.$transaction(async (tx) => {
-      const debit = await tx.account.updateMany({
-        where: { id: source.id, status: "ACTIVE", balanceMinor: { gte: amountMinor } },
-        data: { balanceMinor: { decrement: amountMinor } }
-      });
-      if (debit.count !== 1) throw new Error("INSUFFICIENT_FUNDS");
-
-      const transaction = await tx.transaction.create({
-        data: {
-          reference, accountId: source.id, type: "TRANSFER", status: "COMPLETED",
-          amountMinor, currency: source.currency, description,
-          metadata: {
-            source: "prototype_transfer", transferType, beneficiaryId: beneficiary.id,
-            beneficiary: { name: beneficiary.name, bankName: beneficiary.bankName, country: beneficiary.country, accountNumber: beneficiary.accountNumber, iban: beneficiary.iban, swiftBic: beneficiary.swiftBic }
-          }
-        }
-      });
-      await tx.ledgerEntry.create({
-        data: { transactionId: transaction.id, accountId: source.id, amountMinor, currency: source.currency, direction: "DEBIT" }
-      });
-      await tx.transferPin.update({ where: { id: pinRecord.id }, data: { failedAttempts: 0, lockedUntil: null } });
-    });
-  } catch (error) {
-    if (error instanceof Error && error.message === "INSUFFICIENT_FUNDS") {
-      return res.status(400).json({ error: "Insufficient available balance." });
-    }
-    throw error;
-  }
-
-  await prisma.securityEvent.create({ data: { userId: session.userId, event: "TRANSFER_COMPLETED", metadata: { reference, transferType, amount: numericAmount, currency: source.currency } } });
-  await audit(session.userId, "CREATE_TRANSFER", "TRANSACTION", reference);
-  const updated = await prisma.account.findUnique({ where: { id: source.id }, select: { balanceMinor: true } });
-  res.status(201).json({ ok: true, reference, status: "COMPLETED", balanceMinor: updated?.balanceMinor.toString() ?? "0" });
+  await audit(session.userId,"CREATE_TRANSFER","TRANSACTION",reference);
+  await prisma.securityEvent.create({data:{userId:session.userId,event:"TRANSFER_PROCESSING",metadata:{reference,transferType:type,amount,currency:source.currency}}});
+  res.status(201).json({ok:true,reference,status:"PROCESSING",message:"Transfer received and is processing. Please contact customer care for assistance."});
 });
 
 app.get("/api/admin/overview", requireRole("ADMIN"), async (_req, res) => {
