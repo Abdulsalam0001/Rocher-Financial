@@ -19,6 +19,28 @@ app.use(express.json());
 app.use(morgan("combined"));
 app.use(express.static(publicDir));
 
+const loginChallenges = new Map<string, { answer: string; expiresAt: number }>();
+
+function createLoginChallenge() {
+  const a = Math.floor(Math.random() * 9) + 2;
+  const b = Math.floor(Math.random() * 9) + 1;
+  const operation = Math.random() > 0.5 ? "+" : "−";
+  const answer = operation === "+" ? a + b : a - b;
+  const id = randomBytes(18).toString("hex");
+  loginChallenges.set(id, { answer: String(answer), expiresAt: Date.now() + 5 * 60 * 1000 });
+  return { id, question: `${a} ${operation} ${b} = ?` };
+}
+
+function consumeLoginChallenge(id: string, answer: string) {
+  const challenge = loginChallenges.get(id);
+  if (!challenge || challenge.expiresAt < Date.now()) {
+    if (id) loginChallenges.delete(id);
+    return false;
+  }
+  loginChallenges.delete(id);
+  return challenge.answer === String(answer).trim();
+}
+
 function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   return `scrypt:${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
@@ -71,6 +93,11 @@ async function audit(userId: string, action: string, resource: string, resourceI
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "rocher-mutuel-financial", environment: process.env.NODE_ENV ?? "development" });
+});
+
+app.get("/api/auth/login-challenge", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(createLoginChallenge());
 });
 
 app.post("/api/auth/login", async (req, res) => {
