@@ -179,7 +179,7 @@ app.get("/api/customer/me", requireRole("CUSTOMER"), async (_req, res) => {
   const transactions = await prisma.transaction.findMany({ where: { accountId: { in: ids } }, orderBy: { createdAt: "desc" }, take: 10 });
   res.json({
     customer: { firstName: customer.firstName, lastName: customer.lastName, email: customer.user.email, phone: customer.phone, country: customer.country },
-    accounts: customer.accounts.map((h) => ({ accountNumber: h.account.accountNumber, type: h.account.type, currency: h.account.currency, status: h.account.status, balanceMinor: h.account.balanceMinor.toString() })),
+    accounts: customer.accounts.map((h) => ({ id: h.account.id, accountNumber: h.account.accountNumber, type: h.account.type, currency: h.account.currency, status: h.account.status, balanceMinor: h.account.balanceMinor.toString() })),
     transactions: transactions.map((t) => ({ reference: t.reference, type: t.type, status: t.status, amountMinor: t.amountMinor.toString(), currency: t.currency, description: t.description, createdAt: t.createdAt }))
   });
 });
