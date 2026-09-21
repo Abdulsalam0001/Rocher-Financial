@@ -198,12 +198,6 @@ app.get("/api/customer/transfer-pin", requireRole("CUSTOMER"), async (_req, res)
   });
 });
 
-app.get("/api/customer/transfer-pin", requireRole("CUSTOMER"), async (_req, res) => {
-  const session = res.locals.session as { userId: string };
-  const record = await prisma.transferPin.findUnique({ where: { userId: session.userId }, select: { id: true } });
-  res.json({ configured: Boolean(record) });
-});
-
 app.get("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (_req, res) => {
   const session = res.locals.session as { userId: string };
   const customer = await prisma.customer.findUnique({ where: { userId: session.userId }, select: { id: true } });
@@ -275,6 +269,25 @@ app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) =>
   await audit(session.userId,"CREATE_TRANSFER","TRANSACTION",reference);
   await prisma.securityEvent.create({data:{userId:session.userId,event:"TRANSFER_PROCESSING",metadata:{reference,transferType:type,amount,currency:source.currency}}});
   res.status(201).json({ok:true,reference,status:"PROCESSING",message:"Transfer received and is processing. Please contact customer care for assistance."});
+});
+
+app.post("/api/admin/customers/:customerId/transfer-pin", requireRole("ADMIN"), async (req, res) => {
+  const session = res.locals.session as { userId: string };
+  const customer = await prisma.customer.findUnique({ where: { id: req.params.customerId }, select: { id: true, userId: true, firstName: true, lastName: true } });
+  if (!customer) return res.status(404).json({ error: "Customer not found." });
+
+  const pin = String(req.body?.pin ?? "").trim();
+  if (!/^\d{6}$/.test(pin)) return res.status(400).json({ error: "Transfer PIN must contain exactly 6 digits." });
+
+  await prisma.transferPin.upsert({
+    where: { userId: customer.userId },
+    create: { userId: customer.userId, pinHash: hashPassword(pin), failedAttempts: 0, lockedUntil: null },
+    update: { pinHash: hashPassword(pin), failedAttempts: 0, lockedUntil: null }
+  });
+  await audit(session.userId, "ISSUE_TRANSFER_PIN", "CUSTOMER", customer.id);
+  await prisma.securityEvent.create({ data: { userId: customer.userId, event: "TRANSFER_PIN_ISSUED", metadata: { issuedBy: session.userId } } });
+
+  res.json({ ok: true, message: "Transfer PIN issued for the customer." });
 });
 
 app.get("/api/admin/overview", requireRole("ADMIN"), async (_req, res) => {
