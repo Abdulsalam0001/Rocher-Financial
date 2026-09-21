@@ -143,11 +143,16 @@ app.post("/api/admin/customers/:customerId/password", requireRole("ADMIN"), asyn
   if (String(newPassword).length < 8) return res.status(400).json({ error: "New password must be at least 8 characters." });
 
   const customer = await prisma.customer.findUnique({
-    where: { id: customerId },
-    include: { user: true }
+    where: { id: String(customerId) }
   });
   if (!customer) return res.status(404).json({ error: "Customer not found." });
-  if (customer.user.status !== "ACTIVE") return res.status(400).json({ error: "This customer's account is not active." });
+
+  const customerUser = await prisma.user.findUnique({
+    where: { id: customer.userId },
+    select: { id: true, status: true }
+  });
+  if (!customerUser) return res.status(404).json({ error: "Customer login account not found." });
+  if (customerUser.status !== "ACTIVE") return res.status(400).json({ error: "This customer's account is not active." });
 
   await prisma.user.update({
     where: { id: customer.userId },
