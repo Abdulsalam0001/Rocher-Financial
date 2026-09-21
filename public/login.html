@@ -75,19 +75,26 @@
   </section>
 </main>
 <script>
-const toggle=document.querySelector("#passwordToggle");
-const password=document.querySelector("#passwordInput");
-toggle.addEventListener("click",()=>{const visible=password.type==="text";password.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");});
-</script>
-<script>
-const toggle=document.querySelector("#passwordToggle");
-const password=document.querySelector("#passwordInput");
-toggle.addEventListener("click",()=>{const visible=password.type==="text";password.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");});
+const passwordToggle=document.querySelector("#passwordToggle");
+const passwordInput=document.querySelector("#passwordInput");
+if(passwordToggle&&passwordInput){passwordToggle.addEventListener("click",()=>{const visible=passwordInput.type==="text";passwordInput.type=visible?"password":"text";passwordToggle.textContent=visible?"Show":"Hide";passwordToggle.setAttribute("aria-label",visible?"Show password":"Hide password");});}
 const question=document.querySelector("#challengeQuestion");
 const challengeId=document.querySelector("#challengeId");
 const challengeAnswer=document.querySelector("#challengeAnswer");
 const refreshChallenge=document.querySelector("#refreshChallenge");
-async function loadChallenge(){question.textContent="Loading…";challengeAnswer.value="";challengeAnswer.disabled=true;refreshChallenge.disabled=true;try{const r=await fetch("/api/auth/login-challenge",{cache:"no-store"});const j=await r.json();if(!r.ok)throw new Error();question.textContent=j.question;challengeId.value=j.id;challengeAnswer.disabled=false;challengeAnswer.focus();}catch{question.textContent="Unable to load";}finally{refreshChallenge.disabled=false;}}
+async function loadChallenge(){
+  question.textContent="Loading…"; challengeId.value=""; challengeAnswer.value="";
+  challengeAnswer.disabled=true; refreshChallenge.disabled=true;
+  try{
+    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),8000);
+    const response=await fetch("/api/auth/login-challenge",{cache:"no-store",headers:{"Accept":"application/json"},signal:controller.signal});
+    clearTimeout(timer);
+    const data=await response.json();
+    if(!response.ok||!data.id||!data.question) throw new Error("Security check unavailable");
+    question.textContent=data.question; challengeId.value=data.id; challengeAnswer.disabled=false;
+  }catch(error){ question.textContent="Unable to load"; challengeId.value=""; }
+  finally{ refreshChallenge.disabled=false; }
+}
 refreshChallenge.addEventListener("click",loadChallenge);
 loadChallenge();
 </script>
