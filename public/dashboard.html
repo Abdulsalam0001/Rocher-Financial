@@ -84,18 +84,10 @@
     <div class="table-wrap"><table><thead><tr><th>Date</th><th>Reference</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody id="transactions"></tbody></table></div>
   </section>
 
-  <section class="panel security-panel">
-    <div class="panel-head"><div><p class="eyebrow">SECURITY</p><h2>Transfer PIN</h2><p class="muted">A six-digit PIN is required before a transfer is submitted.</p></div><span id="pinStatus" class="status-pill">Checking…</span></div>
-    <div class="security-actions">
-      <button id="openPin" class="button small" type="button">Set Transfer PIN</button>
-      <span>Transfers are confirmed only after PIN verification.</span>
-    </div>
-  </section>
-
-  <section class="panel security-panel">
-    <div class="panel-head"><div><p class="eyebrow">ACCOUNT SECURITY</p><h2>Change password</h2><p class="muted">Update your account password.</p></div></div>
-    <form id="changePasswordForm" class="password-form"><input name="currentPassword" type="password" placeholder="Current password" autocomplete="current-password" required><input name="newPassword" type="password" placeholder="New password" minlength="8" autocomplete="new-password" required><input name="confirmPassword" type="password" placeholder="Confirm new password" minlength="8" autocomplete="new-password" required><button class="button" type="submit">Change password</button><p id="passwordMessage" class="form-message"></p></form>
-  </section>
+  <footer class="client-footer">
+    <div><strong>ROCHER MUTUEL FINANCIAL</strong><span>Private client banking · Monaco</span></div>
+    <nav><a href="/contact.html">Customer care</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/security.html">Security</a></nav>
+  </footer>
 </main>
 
 <div class="modal-backdrop hidden" id="transferModal">
@@ -123,12 +115,6 @@
   </div>
 </div>
 
-<div class="modal-backdrop hidden" id="pinModal">
-  <div class="modal compact"><button class="modal-close" data-close-modal="pinModal" type="button">×</button><p class="eyebrow">SECURITY</p><h2 id="pinTitle">Set Transfer PIN</h2><p class="muted">Create a six-digit PIN used to authorize transfers.</p>
-    <form id="pinForm"><label id="currentPinWrap" class="hidden">Current PIN<input name="currentPin" inputmode="numeric" maxlength="6" type="password"></label><label>New PIN<input name="pin" inputmode="numeric" maxlength="6" type="password" required></label><label>Confirm PIN<input name="confirmPin" inputmode="numeric" maxlength="6" type="password" required></label><button class="button" type="submit">Save Transfer PIN</button><p id="pinMessage" class="form-message"></p></form>
-  </div>
-</div>
-
 <div class="modal-backdrop hidden" id="beneficiaryModal">
   <div class="modal"><button class="modal-close" data-close-modal="beneficiaryModal" type="button">×</button><p class="eyebrow">RECIPIENT</p><h2>Add beneficiary</h2><p class="muted">Save a recipient for future prototype transfers.</p>
     <form id="beneficiaryForm">
@@ -142,6 +128,7 @@
     </form>
   </div>
 </div>
+<div class="modal-backdrop hidden" id="alertModal"><div class="modal compact"><button class="modal-close" data-close-modal="alertModal" type="button">×</button><p class="eyebrow" id="alertEyebrow">ROCHER MUTUEL</p><h2 id="alertTitle">Notice</h2><p class="muted" id="alertMessage"></p><button class="button" data-close-modal="alertModal" type="button">Continue</button></div></div>
 <script src="/js/dashboard.js"></script><script src="/js/banking.js"></script>
 </body>
 </html>
