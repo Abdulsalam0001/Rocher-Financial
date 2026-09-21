@@ -157,6 +157,99 @@ app.post("/api/admin/customers", requireRole("ADMIN"), async (req, res) => {
   res.status(201).json({ ok: true, customerId: customer.id, accountNumber: customer.accounts[0]?.account.accountNumber });
 });
 
+app.get("/api/admin/balances", requireRole("ADMIN"), async (_req, res) => {
+  const accounts = await prisma.account.findMany({
+    include: { holders: { include: { customer: true } } },
+    orderBy: { createdAt: "desc" }
+  });
+  const transactions = await prisma.transaction.findMany({
+    where: { type: { in: ["DEPOSIT", "WITHDRAWAL", "ADJUSTMENT"] } },
+    include: { account: { include: { holders: { include: { customer: true } } } } },
+    orderBy: { createdAt: "desc" },
+    take: 100
+  });
+  res.json({
+    accounts: accounts.map((a) => ({
+      id: a.id,
+      accountNumber: a.accountNumber,
+      type: a.type,
+      currency: a.currency,
+      status: a.status,
+      balanceMinor: a.balanceMinor.toString(),
+      customer: a.holders[0]?.customer ? {
+        id: a.holders[0].customer.id,
+        name: `${a.holders[0].customer.firstName} ${a.holders[0].customer.lastName}`
+      } : null
+    })),
+    history: transactions.map((t) => ({
+      id: t.id,
+      reference: t.reference,
+      accountId: t.accountId,
+      accountNumber: t.account.accountNumber,
+      customer: t.account.holders[0]?.customer ? `${t.account.holders[0].customer.firstName} ${t.account.holders[0].customer.lastName}` : "Unassigned",
+      type: t.type,
+      direction: t.type === "WITHDRAWAL" ? "DEBIT" : "CREDIT",
+      status: t.status,
+      amountMinor: t.amountMinor.toString(),
+      currency: t.currency,
+      description: t.description,
+      createdAt: t.createdAt
+    }))
+  });
+});
+
+app.post("/api/admin/balances/adjust", requireRole("ADMIN"), async (req, res) => {
+  const session = res.locals.session as { userId: string };
+  const { accountId, direction, amount, description } = req.body as {
+    accountId?: string; direction?: "CREDIT" | "DEBIT"; amount?: string | number; description?: string;
+  };
+  if (!accountId || !direction || amount === undefined) return res.status(400).json({ error: "Account, direction and amount are required." });
+  if (!["CREDIT", "DEBIT"].includes(direction)) return res.status(400).json({ error: "Direction must be CREDIT or DEBIT." });
+
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) return res.status(400).json({ error: "Amount must be greater than zero." });
+
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  if (!account) return res.status(404).json({ error: "Account not found." });
+
+  const amountMinor = BigInt(Math.round(numericAmount * 100));
+  if (amountMinor <= 0n) return res.status(400).json({ error: "Amount is too small." });
+  if (direction === "DEBIT" && account.balanceMinor < amountMinor) return res.status(400).json({ error: "Insufficient balance for this debit." });
+
+  const reference = `RM-${Date.now()}-${randomBytes(4).toString("hex").toUpperCase()}`;
+  const result = await prisma.$transaction(async (tx) => {
+    const updated = await tx.account.update({
+      where: { id: accountId },
+      data: { balanceMinor: { [direction === "CREDIT" ? "increment" : "decrement"]: amountMinor } }
+    });
+    const transaction = await tx.transaction.create({
+      data: {
+        reference,
+        accountId,
+        type: direction === "CREDIT" ? "DEPOSIT" : "WITHDRAWAL",
+        status: "COMPLETED",
+        amountMinor,
+        currency: account.currency,
+        description: description?.trim() || (direction === "CREDIT" ? "Admin credit" : "Admin debit"),
+        metadata: { source: "admin_balance_adjustment", direction, adminUserId: session.userId }
+      }
+    });
+    await tx.ledgerEntry.create({
+      data: {
+        transactionId: transaction.id,
+        accountId,
+        amountMinor,
+        currency: account.currency,
+        direction
+      }
+    });
+    return updated;
+  });
+
+  await audit(session.userId, `BALANCE_${direction}`, "ACCOUNT", accountId);
+  res.status(201).json({ ok: true, accountId, balanceMinor: result.balanceMinor.toString(), reference });
+});
+
 app.get("/api/admin/history", requireRole("ADMIN"), async (_req, res) => {
   const [transactions, auditLogs, securityEvents] = await Promise.all([
     prisma.transaction.findMany({ include: { account: true }, orderBy: { createdAt: "desc" }, take: 50 }),
