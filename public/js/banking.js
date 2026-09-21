@@ -43,14 +43,8 @@ $("#confirmForm").onsubmit=async e=>{
  e.preventDefault();$("#confirmMessage").textContent="Authorizing transfer...";
  try{
  const j=await api("/api/customer/transfers",{method:"POST",body:JSON.stringify({...S.pending,transferPin:$("#transferPin").value})});
- modal("#confirmModal",false);await load();
- alertModal("Transfer processing",j.message||("Transfer "+j.reference+" is now processing. Please contact customer care for assistance."),"TRANSFER RECEIVED");
- }catch(x){modal("#confirmModal",false);alertModal("Transfer not completed",x.data?.message||x.message,"TRANSFER NOTICE")}
-};
-$("#openPin").onclick=()=>{const c=S.pin;$("#pinTitle").textContent=c?"Change Transfer PIN":"Set Transfer PIN";$("#currentPinWrap").classList.toggle("hidden",!c);$("#pinForm").reset();modal("#pinModal",true)};
-$("#pinForm").onsubmit=async e=>{
- e.preventDefault();const f=new FormData(e.currentTarget),p=String(f.get("pin"));if(!/^\d{6}$/.test(p)||p!==f.get("confirmPin"))return $("#pinMessage").textContent="PINs must match and contain exactly 6 digits.";
- try{await api("/api/customer/transfer-pin",{method:"POST",body:JSON.stringify({pin:p,currentPin:f.get("currentPin")||undefined})});S.pin=true;$("#pinStatus").textContent="PIN configured";$("#pinStatus").className="status-pill completed";$("#openPin").textContent="Change Transfer PIN";$("#pinMessage").textContent="Transfer PIN saved.";setTimeout(()=>modal("#pinModal",false),700)}catch(x){$("#pinMessage").textContent=x.message}
+ modal("#confirmModal",false);location.href="/transfer-processing.html?reference="+encodeURIComponent(j.reference);
+ }catch(x){modal("#confirmModal",false);location.href="/transfer-failed.html?reason="+encodeURIComponent(x.data?.message||x.message||"The transfer could not be completed.")}
 };
 $("#beneficiaryForm").onsubmit=async e=>{
  e.preventDefault();try{await api("/api/customer/beneficiaries",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});S.bens=await api("/api/customer/beneficiaries");fill();modal("#beneficiaryModal",false);alertModal("Beneficiary saved","The recipient is now available for transfers.","RECIPIENT")}catch(x){modal("#beneficiaryModal",false);alertModal("Could not save beneficiary",x.message,"RECIPIENT")}
