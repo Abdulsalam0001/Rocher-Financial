@@ -3,6 +3,7 @@
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
   const S={data:null,bens:[],pin:false,pending:null,hide:false,loading:true};
+  const money=(minor,currency)=>{try{return new Intl.NumberFormat(undefined,{style:"currency",currency}).format(Number(minor||0)/100)}catch{return currency+" "+(Number(minor||0)/100).toFixed(2)}};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>c==="&"?"&amp;":c==="<"?"&lt;":c===">"?"&gt;":c==="\""?"&quot;":"&#39;");
   const escText=v=>esc(String(v??""));
   const api=async(url,options={})=>{
@@ -114,5 +115,8 @@
   const openBeneficiary=()=>modal("#beneficiaryModal",true);$("#openBeneficiary")?.addEventListener("click",openBeneficiary);$("#openBeneficiary2")?.addEventListener("click",openBeneficiary);
   $("#beneficiaryList")?.addEventListener("click",e=>{const item=e.target.closest("[data-bid]");if(item)openTransfer("WIRE",item.dataset.bid)});
   $("#toggleBalance")?.addEventListener("click",()=>{S.hide=!S.hide;const b=$("#toggleBalance");if(b)b.setAttribute("aria-label",S.hide?"Show balances":"Hide balances");render()});
+  const mobileNav=$("#mobileNavToggle"),clientNav=$(".client-nav");
+  mobileNav?.addEventListener("click",()=>{const open=clientNav?.classList.toggle("open");mobileNav.setAttribute("aria-expanded",String(Boolean(open)));mobileNav.setAttribute("aria-label",open?"Close banking menu":"Open banking menu");mobileNav.classList.toggle("open",Boolean(open));});
+  clientNav?.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{clientNav.classList.remove("open");mobileNav?.classList.remove("open");mobileNav?.setAttribute("aria-expanded","false");}));
   load();
 })();
