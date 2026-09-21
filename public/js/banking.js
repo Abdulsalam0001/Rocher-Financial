@@ -38,7 +38,7 @@
     const accounts=Array.isArray(S.data?.accounts)?S.data.accounts:[];
     const transactions=Array.isArray(S.data?.transactions)?S.data.transactions:[];
     const primary=accounts[0];
-    const primaryTotal=primary?accounts.filter(a=>a.currency===primary.currency).reduce((sum,a)=>sum+Number(a.balanceMinor||0),0):0;
+    const primaryTotal=primary?Number(S.data?.balancesByCurrency?.[primary.currency]??accounts.filter(a=>a.currency===primary.currency).reduce((sum,a)=>sum+Number(a.balanceMinor||0),0)):0;
     const grid=$("#accountsGrid");
     if(grid)grid.innerHTML=accounts.length?accounts.map(a=>`<article class="account-card"><div class="account-card-top"><span class="label">${esc(a.type)}</span><span class="account-status">${esc(a.status)}</span></div><h3>${esc(a.currency)} ACCOUNT</h3><div class="balance">${S.hide?"••••••":money(a.balanceMinor,a.currency)}</div><div class="account-number">${esc(a.accountNumber)}</div></article>`).join(""):`<div class="empty-state">No accounts are currently available. Please contact customer care.</div>`;
     if($("#welcome"))$("#welcome").textContent=`Welcome, ${S.data?.customer?.firstName||"Client"}.`;
@@ -81,7 +81,7 @@
       if(results[0].status==="fulfilled")S.bens=Array.isArray(results[0].value)?results[0].value:[];else S.bens=[];
       if(results[1].status==="fulfilled"){S.pin=Boolean(results[1].value.configured);}
       fill();
-      setDashboardStatus("Account data updated securely.","success");
+      setDashboardStatus(S.data.accounts.length ? "Account data updated securely." : "No accounts are linked to this customer yet.","success");
       setTimeout(()=>$("#dashboardDataStatus")?.remove(),3000);
     }catch(error){
       if(error.status===401||error.status===403){location.href="/login.html";return}
