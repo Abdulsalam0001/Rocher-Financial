@@ -273,7 +273,7 @@ app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) =>
 
 app.post("/api/admin/customers/:customerId/transfer-pin", requireRole("ADMIN"), async (req, res) => {
   const session = res.locals.session as { userId: string };
-  const customer = await prisma.customer.findUnique({ where: { id: req.params.customerId }, select: { id: true, userId: true, firstName: true, lastName: true } });
+  const customer = await prisma.customer.findUnique({ where: { id: String(req.params.customerId) }, select: { id: true, userId: true, firstName: true, lastName: true } });
   if (!customer) return res.status(404).json({ error: "Customer not found." });
 
   const pin = String(req.body?.pin ?? "").trim();
