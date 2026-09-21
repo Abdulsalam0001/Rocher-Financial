@@ -197,19 +197,66 @@ app.post("/api/admin/customers/:customerId/password", requireRole("ADMIN"), asyn
 
 app.get("/api/customer/me", requireRole("CUSTOMER"), async (_req, res) => {
   const session = res.locals.session as { userId: string };
-  const customer = await prisma.customer.findUnique({
-    where: { userId: session.userId },
-    include: { user: { select: { email: true, status: true, lastLoginAt: true } }, accounts: { include: { account: true } } }
-  });
-  if (!customer) return res.status(404).json({ error: "Customer not found." });
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
 
-  const ids = customer.accounts.map((h) => h.account.id);
-  const transactions = await prisma.transaction.findMany({ where: { accountId: { in: ids } }, orderBy: { createdAt: "desc" }, take: 10 });
-  res.json({
-    customer: { firstName: customer.firstName, lastName: customer.lastName, email: customer.user.email, phone: customer.phone, country: customer.country },
-    accounts: customer.accounts.map((h) => ({ id: h.account.id, accountNumber: h.account.accountNumber, type: h.account.type, currency: h.account.currency, status: h.account.status, balanceMinor: h.account.balanceMinor.toString() })),
-    transactions: transactions.map((t) => ({ reference: t.reference, type: t.type, status: t.status, amountMinor: t.amountMinor.toString(), currency: t.currency, description: t.description, createdAt: t.createdAt }))
-  });
+  try {
+    const customer = await prisma.customer.findUnique({
+      where: { userId: session.userId },
+      include: { user: { select: { email: true, status: true, lastLoginAt: true } } }
+    });
+    if (!customer) return res.status(404).json({ error: "Customer profile not found for this login." });
+
+    // Load the customer's accounts directly through AccountHolder so the dashboard
+    // is not dependent on Prisma's nested relation serialization.
+    const accounts = await prisma.account.findMany({
+      where: { holders: { some: { customerId: customer.id } } },
+      orderBy: { createdAt: "asc" }
+    });
+
+    const ids = accounts.map((account) => account.id);
+    const transactions = ids.length
+      ? await prisma.transaction.findMany({ where: { accountId: { in: ids } }, orderBy: { createdAt: "desc" }, take: 10 })
+      : [];
+
+    const balancesByCurrency = accounts.reduce<Record<string, string>>((result, account) => {
+      const current = BigInt(result[account.currency] ?? "0");
+      result[account.currency] = (current + account.balanceMinor).toString();
+      return result;
+    }, {});
+
+    return res.json({
+      customer: {
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.user.email,
+        phone: customer.phone,
+        country: customer.country
+      },
+      accounts: accounts.map((account) => ({
+        id: account.id,
+        accountNumber: account.accountNumber,
+        type: account.type,
+        currency: account.currency,
+        status: account.status,
+        balanceMinor: account.balanceMinor.toString()
+      })),
+      balancesByCurrency,
+      transactions: transactions.map((transaction) => ({
+        reference: transaction.reference,
+        type: transaction.type,
+        status: transaction.status,
+        amountMinor: transaction.amountMinor.toString(),
+        currency: transaction.currency,
+        description: transaction.description,
+        createdAt: transaction.createdAt
+      }))
+    });
+  } catch (error) {
+    console.error("CUSTOMER_DASHBOARD_LOAD_ERROR", error);
+    return res.status(500).json({ error: "Unable to load your customer banking data. Please try again." });
+  }
 });
 
 
