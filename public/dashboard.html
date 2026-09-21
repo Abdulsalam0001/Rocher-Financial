@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Private Client | Rocher Financial</title>
+<title>Private Client | Rocher Mutuel Financial</title>
 <link rel="stylesheet" href="/css/app.css">
 <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body class="client-app">
 <header class="dash-header">
-  <a class="auth-brand" href="/"><span>RF</span><div>ROCHER<small>FINANCIAL</small></div></a>
+  <a class="auth-brand" href="/"><span>RM</span><div>ROCHER MUTUEL<small>FINANCIAL</small></div></a>
   <nav class="client-nav">
     <a class="active" href="#overview">Overview</a>
     <a href="#accounts">Accounts</a>
@@ -22,11 +22,11 @@
 <main class="dash">
   <section id="overview" class="welcome hero-dashboard">
     <div>
-      <p class="eyebrow">PRIVATE CLIENT · ROCHER FINANCIAL</p>
+      <p class="eyebrow">PRIVATE CLIENT · ROCHER MUTUEL FINANCIAL</p>
       <h1 id="welcome">Welcome.</h1>
       <p class="muted" id="email"></p>
     </div>
-    <div class="secure-badge"><span></span> Secure digital banking</div>
+    <div class="secure-badge"><span></span> Secure private banking</div>
   </section>
 
   <section class="wealth-grid">
@@ -51,6 +51,8 @@
     <article class="stat"><span>Active accounts</span><strong id="accountCount">0</strong></article>
     <article class="stat"><span>Base currency</span><strong id="baseCurrency">EUR</strong></article>
   </section>
+
+  <section class="client-command"><div><p class="eyebrow">YOUR FINANCIAL HOME</p><h2>Everything important.<br><em>In one place.</em></h2><p>Accounts, balances, recipients and transfers — arranged around the way you actually bank.</p></div><div class="command-note"><span>●</span><div><b>Connection protected</b><small>Your private banking session is active.</small></div></div></section>
 
   <section class="network-panel">
     <div><div><p class="eyebrow">GLOBAL ACCESS</p><h2>International banking, presented simply.</h2><p class="muted">SWIFT, SEPA, international wire and internal transfers are presented in one private-client experience.</p></div></div>
@@ -93,14 +95,14 @@
 <div class="modal-backdrop hidden" id="transferModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="transferTitle">
     <button class="modal-close" data-close-modal="transferModal" type="button">×</button>
-    <p class="eyebrow">PRIVATE TRANSFER</p><h2 id="transferTitle">International Wire</h2><p class="muted" id="transferSubtitle">Choose a beneficiary and enter the amount.</p>
+    <div class="transfer-modal-head"><div><p class="eyebrow">PRIVATE TRANSFER</p><h2 id="transferTitle">International Wire</h2><p class="muted" id="transferSubtitle">Choose a recipient, enter the amount and review before authorization.</p></div><div class="transfer-secure"><span>●</span> Protected</div></div><div class="transfer-steps"><span class="current"><b>01</b> Details</span><i></i><span><b>02</b> Review</span><i></i><span><b>03</b> Authorize</span></div>
     <form id="transferForm">
       <label>Transfer method<select id="transferType" name="transferType"><option value="SWIFT">SWIFT · International</option><option value="SEPA">SEPA · EUR</option><option value="WIRE">WIRE · Global</option><option value="INTERNAL">INTERNAL · Rocher</option></select></label>
       <label>From account<select id="sourceAccount" name="sourceAccount" required></select></label>
       <label>Beneficiary<select id="beneficiary" name="beneficiary" required></select></label>
       <div class="form-row"><label>Amount<input id="transferAmount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"></label><label>Reference<input id="transferReference" name="reference" maxlength="80" placeholder="Optional reference"></label></div>
       <div id="transferPreview" class="transfer-preview"></div>
-      <button class="button" type="submit">Review transfer</button>
+      <button class="button transfer-submit" type="submit"><span>Review transfer</span><strong>→</strong></button>
       <p id="transferMessage" class="form-message"></p>
     </form>
   </div>
@@ -128,7 +130,7 @@
     </form>
   </div>
 </div>
-<div class="modal-backdrop hidden" id="alertModal"><div class="modal compact"><button class="modal-close" data-close-modal="alertModal" type="button">×</button><p class="eyebrow" id="alertEyebrow">ROCHER MUTUEL</p><h2 id="alertTitle">Notice</h2><p class="muted" id="alertMessage"></p><button class="button" data-close-modal="alertModal" type="button">Continue</button></div></div>
+<div class="modal-backdrop hidden" id="alertModal"><div class="modal compact"><button class="modal-close" data-close-modal="alertModal" type="button">×</button><p class="eyebrow" id="alertEyebrow">ROCHER MUTUEL FINANCIAL</p><h2 id="alertTitle">Notice</h2><p class="muted" id="alertMessage"></p><button class="button" data-close-modal="alertModal" type="button">Continue</button></div></div>
 <script src="/js/dashboard.js"></script><script src="/js/banking.js"></script>
 </body>
 </html>
