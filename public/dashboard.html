@@ -1,1 +1,146 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Dashboard | Rocher Mutuel Financial</title><link rel="stylesheet" href="/css/app.css"><link rel="stylesheet" href="/css/dashboard.css"></head><body><header class="dash-header"><a class="auth-brand" href="/"><span>RM</span><div>ROCHER MUTUEL<small>FINANCIAL</small></div></a><button id="logout" class="ghost">Log out</button></header><main class="dash"><div class="welcome"><div><p class="eyebrow">PRIVATE CLIENT</p><h1 id="welcome">Welcome.</h1><p class="muted" id="email"></p></div></div><section id="accounts" class="account-grid"></section><section class="panel"><div class="panel-head"><div><p class="eyebrow">ACTIVITY</p><h2>Recent history</h2></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Reference</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody id="transactions"></tbody></table></div></section><section class="panel security-panel"><div class="panel-head"><div><p class="eyebrow">ACCOUNT SECURITY</p><h2>Change password</h2><p class="muted">Update your password to keep your account secure.</p></div></div><form id="changePasswordForm" class="password-form"><input name="currentPassword" type="password" placeholder="Current password" autocomplete="current-password" required><input name="newPassword" type="password" placeholder="New password" minlength="8" autocomplete="new-password" required><input name="confirmPassword" type="password" placeholder="Confirm new password" minlength="8" autocomplete="new-password" required><button class="button" type="submit">Change password</button><p id="passwordMessage" class="form-message"></p></form></section></main><script src="/js/dashboard.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Private Client | Rocher Mutuel Financial</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body class="client-app">
+<header class="dash-header">
+  <a class="auth-brand" href="/"><span>RM</span><div>ROCHER MUTUEL<small>FINANCIAL</small></div></a>
+  <nav class="client-nav">
+    <a class="active" href="#overview">Overview</a>
+    <a href="#accounts">Accounts</a>
+    <a href="#transfers">Transfers</a>
+    <a href="#activity">Activity</a>
+  </nav>
+  <button id="logout" class="ghost">Log out</button>
+</header>
+
+<main class="dash">
+  <section id="overview" class="welcome hero-dashboard">
+    <div>
+      <p class="eyebrow">PRIVATE CLIENT · MONACO</p>
+      <h1 id="welcome">Welcome.</h1>
+      <p class="muted" id="email"></p>
+    </div>
+    <div class="secure-badge"><span></span> Secure private banking</div>
+  </section>
+
+  <section class="wealth-grid">
+    <article class="wealth-card">
+      <div class="wealth-top"><div><p class="eyebrow">TOTAL AVAILABLE WEALTH</p><h2 id="totalBalance">—</h2></div><button id="toggleBalance" class="icon-button" type="button" aria-label="Hide balances">◉</button></div>
+      <div class="wealth-bottom">
+        <span id="primaryAccount">Primary account</span>
+        <span>Updated just now</span>
+      </div>
+    </article>
+    <div class="quick-actions" id="transfers">
+      <button class="action-card" data-open-transfer="SWIFT"><strong>↗</strong><span>SWIFT</span><small>International wire</small></button>
+      <button class="action-card" data-open-transfer="SEPA"><strong>€</strong><span>SEPA</span><small>EUR transfer</small></button>
+      <button class="action-card" data-open-transfer="WIRE"><strong>↗</strong><span>Wire</span><small>Global transfer</small></button>
+      <button class="action-card" id="openBeneficiary"><strong>+</strong><span>Beneficiary</span><small>Add recipient</small></button>
+    </div>
+  </section>
+
+  <section class="stat-grid premium-stats">
+    <article class="stat"><span>Available cash</span><strong id="availableCash">—</strong></article>
+    <article class="stat"><span>Pending transfers</span><strong id="pendingCount">0</strong></article>
+    <article class="stat"><span>Active accounts</span><strong id="accountCount">0</strong></article>
+    <article class="stat"><span>Base currency</span><strong id="baseCurrency">EUR</strong></article>
+  </section>
+
+  <section class="network-panel">
+    <div><div><p class="eyebrow">GLOBAL ACCESS</p><h2>International banking, presented simply.</h2><p class="muted">SWIFT, SEPA, international wire and internal transfers are presented in one private-client experience.</p></div></div>
+    <div class="network-stats"><span><b>04</b> Currencies</span><span><b>24/7</b> Digital access</span><span><b>GLOBAL</b> Transfer options</span></div>
+  </section>
+
+  <section id="accounts" class="panel">
+    <div class="panel-head"><div><p class="eyebrow">ACCOUNTS</p><h2>Accounts & balances</h2></div><span class="section-note">EUR · USD · GBP · CHF</span></div>
+    <div id="accountsGrid" class="account-grid"></div>
+  </section>
+
+  <section class="two-column">
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">BENEFICIARIES</p><h2>Recipients</h2></div><button class="button small" id="openBeneficiary2" type="button">＋ Add</button></div>
+      <div id="beneficiaryList" class="beneficiary-list"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><p class="eyebrow">TRANSFER CENTRE</p><h2>Move money</h2></div></div>
+      <div class="transfer-options">
+        <button data-open-transfer="SWIFT"><b>SWIFT</b><span>International</span></button>
+        <button data-open-transfer="SEPA"><b>SEPA</b><span>EUR payments</span></button>
+        <button data-open-transfer="WIRE"><b>WIRE</b><span>Global wire</span></button>
+        <button data-open-transfer="INTERNAL"><b>INTERNAL</b><span>Rocher account</span></button>
+      </div>
+    </section>
+  </section>
+
+  <section id="activity" class="panel">
+    <div class="panel-head"><div><p class="eyebrow">ACTIVITY</p><h2>Recent transactions</h2></div><span class="section-note">Latest 10</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Reference</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody id="transactions"></tbody></table></div>
+  </section>
+
+  <section class="panel security-panel">
+    <div class="panel-head"><div><p class="eyebrow">SECURITY</p><h2>Transfer PIN</h2><p class="muted">A six-digit PIN is required before a transfer is submitted.</p></div><span id="pinStatus" class="status-pill">Checking…</span></div>
+    <div class="security-actions">
+      <button id="openPin" class="button small" type="button">Set Transfer PIN</button>
+      <span>Transfers are confirmed only after PIN verification.</span>
+    </div>
+  </section>
+
+  <section class="panel security-panel">
+    <div class="panel-head"><div><p class="eyebrow">ACCOUNT SECURITY</p><h2>Change password</h2><p class="muted">Update your account password.</p></div></div>
+    <form id="changePasswordForm" class="password-form"><input name="currentPassword" type="password" placeholder="Current password" autocomplete="current-password" required><input name="newPassword" type="password" placeholder="New password" minlength="8" autocomplete="new-password" required><input name="confirmPassword" type="password" placeholder="Confirm new password" minlength="8" autocomplete="new-password" required><button class="button" type="submit">Change password</button><p id="passwordMessage" class="form-message"></p></form>
+  </section>
+</main>
+
+<div class="modal-backdrop hidden" id="transferModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="transferTitle">
+    <button class="modal-close" data-close-modal="transferModal" type="button">×</button>
+    <p class="eyebrow">PRIVATE TRANSFER</p><h2 id="transferTitle">International Wire</h2><p class="muted" id="transferSubtitle">Choose a beneficiary and enter the amount.</p>
+    <form id="transferForm">
+      <label>Transfer method<select id="transferType" name="transferType"><option value="SWIFT">SWIFT · International</option><option value="SEPA">SEPA · EUR</option><option value="WIRE">WIRE · Global</option><option value="INTERNAL">INTERNAL · Rocher</option></select></label>
+      <label>From account<select id="sourceAccount" name="sourceAccount" required></select></label>
+      <label>Beneficiary<select id="beneficiary" name="beneficiary" required></select></label>
+      <div class="form-row"><label>Amount<input id="transferAmount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"></label><label>Reference<input id="transferReference" name="reference" maxlength="80" placeholder="Optional reference"></label></div>
+      <div id="transferPreview" class="transfer-preview"></div>
+      <button class="button" type="submit">Review transfer</button>
+      <p id="transferMessage" class="form-message"></p>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="confirmModal">
+  <div class="modal compact" role="dialog" aria-modal="true">
+    <button class="modal-close" data-close-modal="confirmModal" type="button">×</button>
+    <p class="eyebrow">FINAL CONFIRMATION</p><h2>Confirm transfer</h2>
+    <div id="confirmationSummary" class="confirmation-summary"></div>
+    <form id="confirmForm"><label>Transfer PIN<input id="transferPin" inputmode="numeric" pattern="\d{6}" maxlength="6" type="password" placeholder="••••••" autocomplete="one-time-code" required></label><button class="button" type="submit">Confirm & send</button><p id="confirmMessage" class="form-message"></p></form>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="pinModal">
+  <div class="modal compact"><button class="modal-close" data-close-modal="pinModal" type="button">×</button><p class="eyebrow">SECURITY</p><h2 id="pinTitle">Set Transfer PIN</h2><p class="muted">Create a six-digit PIN used to authorize transfers.</p>
+    <form id="pinForm"><label id="currentPinWrap" class="hidden">Current PIN<input name="currentPin" inputmode="numeric" maxlength="6" type="password"></label><label>New PIN<input name="pin" inputmode="numeric" maxlength="6" type="password" required></label><label>Confirm PIN<input name="confirmPin" inputmode="numeric" maxlength="6" type="password" required></label><button class="button" type="submit">Save Transfer PIN</button><p id="pinMessage" class="form-message"></p></form>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="beneficiaryModal">
+  <div class="modal"><button class="modal-close" data-close-modal="beneficiaryModal" type="button">×</button><p class="eyebrow">RECIPIENT</p><h2>Add beneficiary</h2><p class="muted">Save a recipient for future prototype transfers.</p>
+    <form id="beneficiaryForm">
+      <div class="form-row"><label>Name<input name="name" required placeholder="Beneficiary name"></label><label>Country<input name="country" required placeholder="Monaco"></label></div>
+      <div class="form-row"><label>Bank name<input name="bankName" required placeholder="Bank name"></label><label>Currency<select name="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option></select></label></div>
+      <label>Account number<input name="accountNumber" required placeholder="Account number"></label>
+      <div class="form-row"><label>IBAN<input name="iban" placeholder="Optional IBAN"></label><label>SWIFT / BIC<input name="swiftBic" placeholder="Optional SWIFT/BIC"></label></div>
+      <label>Bank address<input name="bankAddress" placeholder="Optional bank address"></label>
+      <label>Default transfer type<select name="transferType"><option value="SWIFT">SWIFT</option><option value="SEPA">SEPA</option><option value="WIRE">WIRE</option><option value="INTERNAL">INTERNAL</option></select></label>
+      <button class="button" type="submit">Save beneficiary</button><p id="beneficiaryMessage" class="form-message"></p>
+    </form>
+  </div>
+</div>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
