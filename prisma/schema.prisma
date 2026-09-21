@@ -66,39 +66,41 @@ enum InvestmentStatus {
 }
 
 model User {
-  id            String       @id @default(cuid())
-  email         String       @unique
-  status        UserStatus   @default(ACTIVE)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  customer      Customer?
-  staff         Staff?
-  auditLogs     AuditLog[]
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String
+  status         UserStatus   @default(ACTIVE)
+  lastLoginAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  customer       Customer?
+  staff          Staff?
+  auditLogs      AuditLog[]
   securityEvents SecurityEvent[]
 }
 
 model Customer {
-  id            String      @id @default(cuid())
-  userId        String      @unique
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  firstName     String
-  lastName      String
-  phone         String?
-  country       String?
-  accounts      AccountHolder[]
-  loans         Loan[]
-  investments   Investment[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id          String          @id @default(cuid())
+  userId      String          @unique
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String
+  phone       String?
+  country     String?
+  accounts    AccountHolder[]
+  loans       Loan[]
+  investments Investment[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model Staff {
-  id            String      @id @default(cuid())
-  userId        String      @unique
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role          String
-  active        Boolean     @default(true)
-  createdAt     DateTime    @default(now())
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model Account {
@@ -126,48 +128,48 @@ model AccountHolder {
 }
 
 model Transaction {
-  id              String            @id @default(cuid())
-  reference       String            @unique
-  accountId       String
-  type            TransactionType
-  status          TransactionStatus @default(PENDING)
-  amountMinor     BigInt
-  currency        String            @db.VarChar(3)
-  description     String?
-  idempotencyKey  String?           @unique
-  metadata        Json?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  account         Account           @relation(fields: [accountId], references: [id])
-  ledgerEntries   LedgerEntry[]
+  id             String            @id @default(cuid())
+  reference      String            @unique
+  accountId      String
+  type           TransactionType
+  status         TransactionStatus @default(PENDING)
+  amountMinor    BigInt
+  currency       String            @db.VarChar(3)
+  description    String?
+  idempotencyKey String?           @unique
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  account        Account           @relation(fields: [accountId], references: [id])
+  ledgerEntries  LedgerEntry[]
 }
 
 model LedgerEntry {
-  id             String      @id @default(cuid())
-  transactionId  String
-  accountId      String
-  amountMinor    BigInt
-  currency       String      @db.VarChar(3)
-  direction      String      @db.VarChar(6)
-  createdAt      DateTime    @default(now())
-  transaction    Transaction @relation(fields: [transactionId], references: [id])
-  account        Account     @relation(fields: [accountId], references: [id])
+  id            String      @id @default(cuid())
+  transactionId String
+  accountId     String
+  amountMinor   BigInt
+  currency      String      @db.VarChar(3)
+  direction     String      @db.VarChar(6)
+  createdAt     DateTime    @default(now())
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  account       Account     @relation(fields: [accountId], references: [id])
 
   @@index([accountId, createdAt])
   @@index([transactionId])
 }
 
 model Loan {
-  id            String     @id @default(cuid())
-  customerId    String
+  id             String        @id @default(cuid())
+  customerId     String
   principalMinor BigInt
-  currency      String     @db.VarChar(3)
-  interestRate  Decimal    @db.Decimal(8, 4)
-  status        LoanStatus  @default(APPLICATION)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  customer      Customer   @relation(fields: [customerId], references: [id])
-  payments      LoanPayment[]
+  currency       String        @db.VarChar(3)
+  interestRate   Decimal       @db.Decimal(8, 4)
+  status         LoanStatus    @default(APPLICATION)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  payments       LoanPayment[]
 }
 
 model LoanPayment {
@@ -180,16 +182,16 @@ model LoanPayment {
 }
 
 model Investment {
-  id            String           @id @default(cuid())
-  customerId    String
-  name          String
+  id             String           @id @default(cuid())
+  customerId     String
+  name           String
   principalMinor BigInt
-  currency      String           @db.VarChar(3)
-  status        InvestmentStatus @default(PROPOSED)
-  maturityDate  DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  customer      Customer        @relation(fields: [customerId], references: [id])
+  currency       String           @db.VarChar(3)
+  status         InvestmentStatus @default(PROPOSED)
+  maturityDate   DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  customer       Customer         @relation(fields: [customerId], references: [id])
 }
 
 model Branch {
