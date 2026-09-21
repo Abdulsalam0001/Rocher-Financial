@@ -31,7 +31,10 @@
       el=document.createElement("div");el.id="dashboardDataStatus";el.className="dashboard-data-status";
       const target=$(".hero-dashboard");if(target)target.insertAdjacentElement("afterend",el);
     }
-    el.dataset.type=type;el.innerHTML=type==="loading"?`<span class="status-spinner"></span>${esc(message)}`:`<span>${type==="error"?"!":"✓"}</span>${esc(message)}${type==="error"?"<button type="button" id="retryDashboard">Retry</button>":""}`;
+    el.dataset.type=type;
+    const icon=type==="error"?"!":"✓";
+    const retry=type==="error"?'<button type="button" id="retryDashboard">Retry</button>':"";
+    el.innerHTML='<span>'+icon+"</span>"+esc(message)+retry;
     if(type==="error")$("#retryDashboard")?.addEventListener("click",load,{once:true});
   };
   const render=()=>{
