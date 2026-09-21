@@ -21,7 +21,7 @@ async function main() {
     }
   });
 
-  const adminPassword = process.env.DEMO_ADMIN_PASSWORD ?? "change-me-admin";
+  const adminPassword = process.env.DEMO_ADMIN_PASSWORD ?? "iloveAllah@12";
 
   const adminEmails = [
     "dre@admin.com",
