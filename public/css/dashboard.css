@@ -235,3 +235,49 @@ td{border-top-color:#e4e9ed}
 .client-app .dash-header{margin-left:238px;padding-left:32px}.client-app .client-nav{display:none}
 .client-app .dash{margin-left:238px;max-width:none;padding-left:42px;padding-right:42px}
 @media(max-width:850px){.desktop-sidebar{display:none}.client-app .dash-header{margin-left:0}.client-app .dash{margin-left:0}}
+
+
+/* Mobile readability fixes */
+@media(max-width:850px){
+  .client-app{background:#f4f7f9!important;color:#24333d!important}
+  .client-app .dash-header{background:#fff!important;color:#24333d!important;border-bottom:1px solid #dce4e9!important}
+  .client-app .dash-header .auth-brand{color:#153f5b!important}
+  .client-app .dash-header .auth-brand>span{background:#0b4f78!important;color:#fff!important}
+  .client-app .dash-header .auth-brand small{color:#0b5f91!important}
+  .client-app .dash-header .ghost{background:#fff!important;color:#153f5b!important;border-color:#cfdbe2!important}
+  .client-app .welcome h1,.client-app .panel-head h2,.client-app .client-command h2,.client-app .network-panel h2{color:#153f5b!important}
+  .client-app .muted,.client-app .section-note,.client-app .panel .muted{color:#60717c!important}
+  .client-app .secure-badge{background:#fff!important;color:#516068!important;border-color:#d8e2e8!important}
+  .client-app .stat,.client-app .account-card,.client-app .panel,.client-app .action-card{color:#24333d!important;background:#fff!important}
+  .client-app .stat span,.client-app .account-number,.client-app .action-card small,.client-app th,.client-app td{color:#60717c!important}
+  .client-app .stat strong,.client-app .account-card h3,.client-app .balance,.client-app .action-card span{color:#153f5b!important}
+  .client-app .network-panel{background:#eaf3f7!important;color:#24333d!important}
+  .client-app .network-panel .muted{color:#60717c!important}
+  .client-app .network-stats span{color:#60717c!important}
+  .client-app .network-stats b{color:#0b5f91!important}
+  .client-app .beneficiary,.client-app .transfer-options button{background:#f8fafb!important;color:#153f5b!important}
+  .client-app .beneficiary small,.client-app .transfer-options span{color:#60717c!important}
+  .client-app .client-command{background:#fff!important;color:#24333d!important}
+  .client-app .command-note{background:#f5f8fa!important;color:#24333d!important}
+  .client-app .command-note b{color:#153f5b!important}
+  .client-app .command-note small{color:#60717c!important}
+  .client-app .table-wrap{color:#24333d!important}
+  .client-app .modal{background:#fff!important;color:#24333d!important}
+  .client-app .modal h2,.client-app .modal label{color:#153f5b!important}
+  .client-app .modal .muted,.client-app .modal .form-message{color:#60717c!important}
+  .client-app .modal input,.client-app .modal select{background:#fff!important;color:#24333d!important;border-color:#cfdbe2!important}
+  .client-app .modal input::placeholder{color:#89969e!important}
+}
+@media(max-width:520px){
+  .client-app .dash-header{min-height:62px}
+  .client-app .dash-header .auth-brand div{color:#153f5b!important}
+  .client-app .welcome h1{color:#153f5b!important}
+  .client-app .wealth-card{color:#fff!important}
+  .client-app .wealth-card h2,.client-app .wealth-card .eyebrow,.client-app .wealth-card .wealth-bottom{color:#fff!important}
+  .client-app .wealth-card .eyebrow{color:#e8cf9c!important}
+  .client-app .wealth-bottom{color:rgba(255,255,255,.72)!important}
+  .client-app .action-card{min-height:118px}
+  .client-app .action-card strong{color:#0b5f91!important}
+  .client-app .premium-stats .stat{min-height:86px}
+  .client-app .premium-stats .stat strong{color:#153f5b!important}
+}
