@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transfer Processing | Rocher Mutuel Financial</title><link rel="stylesheet" href="/css/app.css"><link rel="stylesheet" href="/css/status-pages.css"></head>
+<body class="client-app status-page"><main class="status-shell">
+<a class="auth-brand" href="/dashboard.html"><span>RM</span><div>ROCHER MUTUEL<small>FINANCIAL</small></div></a>
+<section class="status-card processing"><div class="status-icon">↻</div><p class="eyebrow">TRANSFER RECEIVED</p><h1>Your transfer is processing.</h1>
+<p class="lead">The transfer has been recorded in your Rocher Mutuel Financial account, but no funds have been moved. This prototype keeps the transaction in <strong>PROCESSING</strong> until customer care completes the next step.</p>
+<div class="status-details"><div><span>Reference</span><strong id="reference">—</strong></div><div><span>Status</span><strong>PROCESSING</strong></div></div>
+<div class="status-actions"><a class="button" href="/dashboard.html#activity">View transaction history</a><a class="button secondary" href="/contact.html">Contact customer care</a></div>
+<p class="status-note">Keep your transfer reference when contacting customer care.</p></section>
+<footer>Rocher Mutuel Financial · Private client banking · Monaco</footer></main>
+<script>const q=new URLSearchParams(location.search);document.querySelector("#reference").textContent=q.get("reference")||"Pending reference";</script>
+</body></html>
