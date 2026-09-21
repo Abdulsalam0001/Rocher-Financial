@@ -139,22 +139,99 @@ app.get("/api/admin/customers", requireRole("ADMIN"), async (_req, res) => {
 
 app.post("/api/admin/customers", requireRole("ADMIN"), async (req, res) => {
   const session = res.locals.session as { userId: string };
-  const { firstName, lastName, email, password, phone, country, accountType = "CURRENT", currency = "EUR" } = req.body;
+  const { firstName, lastName, email, password, phone, country, accountType = "CURRENT", currency = "EUR", generateHistory = false } = req.body;
   if (!firstName || !lastName || !email || !password) return res.status(400).json({ error: "First name, last name, email and temporary password are required." });
   if (String(password).length < 8) return res.status(400).json({ error: "Temporary password must be at least 8 characters." });
   const normalizedEmail = String(email).trim().toLowerCase();
   if (await prisma.user.findUnique({ where: { email: normalizedEmail } })) return res.status(409).json({ error: "A user with this email already exists." });
 
-  const customer = await prisma.customer.create({
-    data: {
-      firstName, lastName, phone, country,
-      user: { create: { email: normalizedEmail, passwordHash: hashPassword(String(password)) } },
-      accounts: { create: { account: { create: { accountNumber: `RM${Date.now().toString().slice(-10)}`, type: accountType, currency } } } }
-    },
-    include: { accounts: { include: { account: true } } }
+  const customer = await prisma.$transaction(async (tx) => {
+    const created = await tx.customer.create({
+      data: {
+        firstName, lastName, phone, country,
+        user: { create: { email: normalizedEmail, passwordHash: hashPassword(String(password)) } },
+        accounts: { create: { account: { create: { accountNumber: `RM${Date.now().toString().slice(-10)}`, type: accountType, currency } } } }
+      },
+      include: { accounts: { include: { account: true } } }
+    });
+
+    const account = created.accounts[0]?.account;
+    if (!account) throw new Error("Unable to create customer account.");
+
+    if (generateHistory === true) {
+      let balance = BigInt(0);
+      const now = Date.now();
+      const events = [
+        { type: "DEPOSIT" as const, min: 25000, max: 90000, descriptions: ["Initial funding", "Opening deposit", "Private client funding"] },
+        { type: "DEPOSIT" as const, min: 3000, max: 18000, descriptions: ["Salary credit", "Incoming transfer", "Portfolio transfer", "Client deposit"] },
+        { type: "WITHDRAWAL" as const, min: 700, max: 6500, descriptions: ["Card purchase", "Outgoing transfer", "Bill payment", "Service payment"] },
+        { type: "DEPOSIT" as const, min: 2000, max: 12000, descriptions: ["Incoming transfer", "Funds received", "Account credit"] },
+        { type: "WITHDRAWAL" as const, min: 500, max: 5000, descriptions: ["Card purchase", "Outgoing transfer", "Payment"] },
+        { type: "WITHDRAWAL" as const, min: 800, max: 7500, descriptions: ["Transfer", "Payment", "Card purchase"] },
+        { type: "DEPOSIT" as const, min: 1500, max: 10000, descriptions: ["Incoming transfer", "Account credit", "Funds received"] },
+        { type: "WITHDRAWAL" as const, min: 600, max: 4500, descriptions: ["Payment", "Card purchase", "Outgoing transfer"] },
+        { type: "DEPOSIT" as const, min: 2000, max: 14000, descriptions: ["Client deposit", "Incoming transfer", "Salary credit"] },
+        { type: "WITHDRAWAL" as const, min: 500, max: 6000, descriptions: ["Outgoing transfer", "Payment", "Card purchase"] }
+      ];
+
+      for (let i = 0; i < events.length; i += 1) {
+        const event = events[i];
+        let amount = Math.round((event.min + Math.random() * (event.max - event.min)) * 100);
+        let direction = event.type;
+
+        if (direction === "WITHDRAWAL" && balance < BigInt(amount)) {
+          direction = "DEPOSIT";
+          amount = Math.round((5000 + Math.random() * 15000) * 100);
+        }
+
+        const amountMinor = BigInt(amount);
+        balance = direction === "DEPOSIT" ? balance + amountMinor : balance - amountMinor;
+        const createdAt = new Date(now - (events.length - i) * (3 + Math.floor(Math.random() * 10)) * 86400000);
+        const description = event.descriptions[Math.floor(Math.random() * event.descriptions.length)];
+        const reference = `RM-${createdAt.getTime()}-${randomBytes(3).toString("hex").toUpperCase()}`;
+
+        const transaction = await tx.transaction.create({
+          data: {
+            reference,
+            accountId: account.id,
+            type: direction,
+            status: "COMPLETED",
+            amountMinor,
+            currency,
+            description,
+            metadata: { source: "demo_history_generator" },
+            createdAt
+          }
+        });
+
+        await tx.ledgerEntry.create({
+          data: {
+            transactionId: transaction.id,
+            accountId: account.id,
+            amountMinor,
+            currency,
+            direction: direction === "DEPOSIT" ? "CREDIT" : "DEBIT",
+            createdAt
+          }
+        });
+      }
+
+      await tx.account.update({
+        where: { id: account.id },
+        data: { balanceMinor: balance }
+      });
+    }
+
+    return created;
   });
+
   await audit(session.userId, "CREATE_CUSTOMER", "CUSTOMER", customer.id);
-  res.status(201).json({ ok: true, customerId: customer.id, accountNumber: customer.accounts[0]?.account.accountNumber });
+  res.status(201).json({
+    ok: true,
+    customerId: customer.id,
+    accountNumber: customer.accounts[0]?.account.accountNumber,
+    historyGenerated: generateHistory === true
+  });
 });
 
 app.get("/api/admin/balances", requireRole("ADMIN"), async (_req, res) => {
