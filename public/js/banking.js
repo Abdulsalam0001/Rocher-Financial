@@ -21,7 +21,7 @@ function fill(){
 }
 function preview(){const a=S.data.accounts.find(x=>x.id===$("#sourceAccount").value),b=S.bens.find(x=>x.id===$("#beneficiary").value),n=Number($("#transferAmount").value||0);$("#transferPreview").innerHTML=a&&b?"<span>From <b>"+a.currency+" · "+a.accountNumber+"</b></span><span>To <b>"+esc(b.name)+"</b></span><span>Bank <b>"+esc(b.bankName)+"</b></span>"+(b.iban?"<span>IBAN <b>"+esc(b.iban)+"</b></span>":"")+(b.swiftBic?"<span>SWIFT/BIC <b>"+esc(b.swiftBic)+"</b></span>":"")+(n?"<span>Amount <b>"+money(n*100,a.currency)+"</b></span>":""):"<span>Add a beneficiary to begin.</span>"}
 function openTransfer(type,bid){
- if(!S.pin){alertModal("Transfer PIN pending","Your Transfer PIN is issued by Rocher Mutuel Financial. Please contact customer care before initiating a transfer.","TRANSFER SECURITY");return}
+ if(!S.pin){location.href="/transfer-pin-pending.html";return}
  modal("#transferModal",true);$("#transferType").value=type||"WIRE";fill();if(bid)$("#beneficiary").value=bid;preview()
 }
 async function load(){
