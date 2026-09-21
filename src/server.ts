@@ -134,6 +134,34 @@ app.post("/api/customer/change-password", requireRole("CUSTOMER"), async (req, r
   res.json({ ok: true, message: "Password changed successfully." });
 });
 
+app.post("/api/admin/customers/:customerId/password", requireRole("ADMIN"), async (req, res) => {
+  const session = res.locals.session as { userId: string };
+  const { customerId } = req.params;
+  const { newPassword } = req.body as { newPassword?: string };
+
+  if (!newPassword) return res.status(400).json({ error: "New password is required." });
+  if (String(newPassword).length < 8) return res.status(400).json({ error: "New password must be at least 8 characters." });
+
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId },
+    include: { user: true }
+  });
+  if (!customer) return res.status(404).json({ error: "Customer not found." });
+  if (customer.user.status !== "ACTIVE") return res.status(400).json({ error: "This customer's account is not active." });
+
+  await prisma.user.update({
+    where: { id: customer.userId },
+    data: { passwordHash: hashPassword(String(newPassword)) }
+  });
+
+  await prisma.securityEvent.create({
+    data: { userId: customer.userId, event: "PASSWORD_RESET_BY_ADMIN", metadata: { adminUserId: session.userId } }
+  });
+  await audit(session.userId, "RESET_CUSTOMER_PASSWORD", "USER", customer.userId);
+
+  res.json({ ok: true, message: "Customer password has been changed successfully." });
+});
+
 app.get("/api/customer/me", requireRole("CUSTOMER"), async (_req, res) => {
   const session = res.locals.session as { userId: string };
   const customer = await prisma.customer.findUnique({
