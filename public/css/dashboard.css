@@ -219,3 +219,19 @@ td{border-top-color:#e4e9ed}
 .modal h2{font-family:"DM Sans",sans-serif;font-weight:600}
 .transfer-submit{background:#0b4f78!important}
 @media(max-width:700px){.premium-stats{gap:1px}.premium-stats .stat{border-right:0;border-radius:0!important}}
+
+
+/* Desktop retail-bank sidebar */
+.desktop-sidebar{position:fixed;inset:0 auto 0 0;width:238px;background:#0756a6;color:#fff;padding:28px 18px 20px;display:flex;flex-direction:column;z-index:20;box-shadow:8px 0 30px rgba(7,42,80,.12)}
+.sidebar-brand{display:flex;align-items:center;gap:11px;color:#fff;font-size:10px;font-weight:800;letter-spacing:.13em;line-height:1.05;padding:2px 8px 28px;border-bottom:1px solid rgba(255,255,255,.16)}
+.sidebar-brand>span{width:42px;height:42px;border:1px solid rgba(255,255,255,.65);display:grid;place-items:center;font:14px Georgia,serif}
+.sidebar-brand small{display:block;color:#bfe0ff;font-size:7px;letter-spacing:.22em;margin-top:5px}
+.sidebar-label{font-size:9px;letter-spacing:.18em;font-weight:800;color:#9fcfff;margin:27px 10px 10px}
+.sidebar-nav{display:grid;gap:4px}.sidebar-nav a,.sidebar-bottom a,.sidebar-bottom button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 12px;border:0;background:transparent;color:#dceeff;font:700 12px "DM Sans",sans-serif;text-align:left;text-decoration:none;cursor:pointer;border-radius:4px}
+.sidebar-nav a span,.sidebar-bottom span{width:18px;text-align:center;font-size:15px}.sidebar-nav a:hover,.sidebar-nav a.active,.sidebar-bottom a:hover,.sidebar-bottom button:hover{background:rgba(255,255,255,.13);color:#fff}
+.sidebar-nav a.active{box-shadow:inset 3px 0 0 #fff;background:rgba(255,255,255,.12)}
+.sidebar-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.16);padding-top:14px;display:grid;gap:3px}
+.sidebar-bottom button{color:#dceeff}
+.client-app .dash-header{margin-left:238px;padding-left:32px}
+.client-app .dash{margin-left:238px;max-width:none;padding-left:42px;padding-right:42px}
+@media(max-width:850px){.desktop-sidebar{display:none}.client-app .dash-header{margin-left:0}.client-app .dash{margin-left:0}}
