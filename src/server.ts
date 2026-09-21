@@ -101,6 +101,39 @@ app.post("/api/auth/logout", async (req, res) => {
   res.json({ ok: true });
 });
 
+app.post("/api/customer/change-password", requireRole("CUSTOMER"), async (req, res) => {
+  const session = res.locals.session as { userId: string };
+  const { currentPassword, newPassword } = req.body as { currentPassword?: string; newPassword?: string };
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: "Current password and new password are required." });
+  }
+  if (String(newPassword).length < 8) {
+    return res.status(400).json({ error: "New password must be at least 8 characters." });
+  }
+  if (String(currentPassword) === String(newPassword)) {
+    return res.status(400).json({ error: "New password must be different from your current password." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (!user || user.status !== "ACTIVE") {
+    return res.status(401).json({ error: "Authentication required." });
+  }
+  if (!verifyPassword(String(currentPassword), user.passwordHash)) {
+    await prisma.securityEvent.create({ data: { userId: session.userId, event: "PASSWORD_CHANGE_FAILED" } });
+    return res.status(401).json({ error: "Current password is incorrect." });
+  }
+
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: { passwordHash: hashPassword(String(newPassword)) }
+  });
+  await prisma.securityEvent.create({ data: { userId: session.userId, event: "PASSWORD_CHANGED" } });
+  await audit(session.userId, "CHANGE_PASSWORD", "USER", session.userId);
+
+  res.json({ ok: true, message: "Password changed successfully." });
+});
+
 app.get("/api/customer/me", requireRole("CUSTOMER"), async (_req, res) => {
   const session = res.locals.session as { userId: string };
   const customer = await prisma.customer.findUnique({
