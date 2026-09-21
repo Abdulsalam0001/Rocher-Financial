@@ -327,3 +327,57 @@ td{border-top-color:#e4e9ed}
   .balance-visibility{padding:6px 8px;min-width:48px}
   .balance-visibility-label{font-size:9px}
 }
+
+/* Responsive customer dashboard hardening */
+.client-app{overflow-x:hidden}
+.client-app .dash{box-sizing:border-box;width:100%;max-width:1280px;min-width:0}
+.client-app .wealth-grid{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);min-width:0}
+.client-app .wealth-card,.client-app .quick-actions{min-width:0}
+.client-app .quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+.client-app .action-card{min-width:0;width:100%;box-sizing:border-box}
+.client-app .wealth-top{min-width:0}
+.client-app .wealth-top>div{min-width:0}
+.client-app .wealth-card h2{overflow-wrap:anywhere}
+.client-app .premium-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1050px){
+  .client-app .wealth-grid{grid-template-columns:1fr}
+  .client-app .quick-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .client-app .wealth-card{width:100%;box-sizing:border-box}
+}
+@media(max-width:850px){
+  .client-app .dash{padding-left:20px;padding-right:20px}
+  .client-app .premium-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .client-app .quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .client-app .wealth-top{align-items:flex-start}
+  .client-app .wealth-top>div:nth-child(1){flex:1}
+  .client-app .balance-visibility{flex:0 0 auto}
+  .client-app .wealth-bottom{gap:12px;flex-wrap:wrap}
+}
+@media(max-width:520px){
+  .client-app .dash{padding:30px 14px 70px}
+  .client-app .wealth-card{padding:20px}
+  .client-app .wealth-top{gap:8px}
+  .client-app .wealth-card h2{font-size:34px;margin:8px 0 22px}
+  .client-app .balance-visibility{min-width:0;padding:6px 9px}
+  .client-app .quick-actions{gap:10px}
+  .client-app .action-card{min-height:96px;padding:14px 10px}
+  .client-app .action-card span{font-size:13px}
+  .client-app .action-card small{font-size:10px}
+  .client-app .premium-stats{gap:10px}
+  .client-app .premium-stats .stat{padding:16px 13px;min-width:0}
+  .client-app .premium-stats .stat strong{font-size:23px;overflow-wrap:anywhere}
+  .client-app .panel{padding:17px 14px}
+  .client-app .panel-head{gap:10px}
+  .client-app .panel-head h2{font-size:24px}
+  .client-app .section-note{font-size:9px;white-space:nowrap}
+  .client-app .network-panel,.client-app .client-command{padding:22px 18px}
+  .client-app .network-stats{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  .client-app .dash-header .auth-brand div{max-width:108px}
+  .client-app .dash-header .ghost{font-size:9px;padding:7px 8px}
+  .client-app .mobile-nav-toggle{width:32px;height:32px}
+  .client-app .wealth-card h2{font-size:30px}
+  .client-app .balance-visibility-label{display:none}
+  .client-app .balance-visibility{width:32px;height:32px;padding:0}
+}
