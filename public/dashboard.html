@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Private Client | Rocher Mutuel Financial</title>
 <link rel="stylesheet" href="/css/app.css">
-<link rel="stylesheet" href="/css/dashboard.css?v=20260923">
+<link rel="stylesheet" href="/css/dashboard.css?v=20260924">
 </head>
 <body class="client-app">
 <aside class="desktop-sidebar" aria-label="Customer banking navigation">
@@ -21,6 +21,7 @@
 </aside>
 <header class="dash-header">
   <a class="auth-brand" href="/"><span>RM</span><div>ROCHER MUTUEL<small>FINANCIAL</small></div></a>
+  <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-label="Open banking menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <nav class="client-nav">
     <a class="active" href="#overview">Overview</a>
     <a href="#accounts">Accounts</a>
@@ -42,7 +43,7 @@
 
   <section class="wealth-grid">
     <article class="wealth-card">
-      <div class="wealth-top"><div class="wealth-mark">RF</div><div><p class="eyebrow">TOTAL AVAILABLE WEALTH</p><h2 id="totalBalance">—</h2></div><button id="toggleBalance" class="icon-button" type="button" aria-label="Hide balances">◉</button></div>
+      <div class="wealth-top"><div class="wealth-mark">RF</div><div><p class="eyebrow">TOTAL AVAILABLE WEALTH</p><h2 id="totalBalance">—</h2></div><button id="toggleBalance" class="balance-visibility" type="button" aria-label="Hide balances"><span class="balance-eye">◉</span><span class="balance-visibility-label">Hide</span></button></div>
       <div class="wealth-bottom">
         <span id="primaryAccount">Primary account</span>
         <span>Updated just now</span>
@@ -142,6 +143,6 @@
   </div>
 </div>
 <div class="modal-backdrop hidden" id="alertModal"><div class="modal compact"><button class="modal-close" data-close-modal="alertModal" type="button">×</button><p class="eyebrow" id="alertEyebrow">ROCHER MUTUEL FINANCIAL</p><h2 id="alertTitle">Notice</h2><p class="muted" id="alertMessage"></p><button class="button" data-close-modal="alertModal" type="button">Continue</button></div></div>
-<script src="/js/dashboard.js?v=20260923"></script><script src="/js/banking.js?v=20260923"></script>
+<script src="/js/dashboard.js?v=20260923"></script><script src="/js/banking.js?v=20260924"></script>
 </body>
 </html>
