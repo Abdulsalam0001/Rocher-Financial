@@ -250,7 +250,7 @@ app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) =>
   if(!pin) return res.status(409).json({error:"TRANSFER_PIN_NOT_SET",message:"Your Transfer PIN has not been issued yet. Please contact customer care."});
   if(pin.lockedUntil&&pin.lockedUntil>new Date()) return res.status(423).json({error:"Transfer authorization is temporarily locked.",lockedUntil:pin.lockedUntil});
   if(!verifyPassword(String(body.transferPin),pin.pinHash)){const failed=pin.failedAttempts+1;const locked=failed>=5?new Date(Date.now()+15*60*1000):null;await prisma.transferPin.update({where:{id:pin.id},data:{failedAttempts:failed,lockedUntil:locked}});return res.status(401).json({error:locked?"Too many incorrect PIN attempts. Transfers are locked for 15 minutes.":"Incorrect Transfer PIN."});}
-  const customer=await prisma.customer.findUnique({where:{userId:session.userId},include:{accounts:{include:{account:true}}});
+  const customer=await prisma.customer.findUnique({where:{userId:session.userId},include:{accounts:{include:{account:true}}}});
   if(!customer)return res.status(404).json({error:"Customer not found."});
   const source=customer.accounts.find(h=>h.account.id===body.sourceAccountId)?.account;
   if(!source)return res.status(404).json({error:"Source account not found."});
