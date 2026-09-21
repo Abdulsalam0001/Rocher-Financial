@@ -47,6 +47,15 @@
           <span class="password-label"><span>Password</span><button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">Show</button></span>
           <input id="passwordInput" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
         </label>
+        <div class="security-challenge" id="securityChallenge">
+          <div class="security-challenge-head">
+            <div><span class="challenge-kicker">RM SECURITY CHECK</span><strong>Confirm you’re human</strong></div>
+            <button type="button" id="refreshChallenge" class="challenge-refresh" aria-label="Get a new security challenge">↻ New</button>
+          </div>
+          <div class="challenge-box"><span id="challengeQuestion">Loading…</span><span class="challenge-equals">Answer</span></div>
+          <input id="challengeAnswer" name="challengeAnswer" inputmode="numeric" autocomplete="off" placeholder="Enter your answer" required>
+          <input id="challengeId" name="challengeId" type="hidden">
+        </div>
         <button class="button login-button" type="submit"><span>Sign in securely</span><span aria-hidden="true">→</span></button>
         <p id="message" class="form-message" role="alert"></p>
       </form>
@@ -69,6 +78,18 @@
 const toggle=document.querySelector("#passwordToggle");
 const password=document.querySelector("#passwordInput");
 toggle.addEventListener("click",()=>{const visible=password.type==="text";password.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");});
+</script>
+<script>
+const toggle=document.querySelector("#passwordToggle");
+const password=document.querySelector("#passwordInput");
+toggle.addEventListener("click",()=>{const visible=password.type==="text";password.type=visible?"password":"text";toggle.textContent=visible?"Show":"Hide";toggle.setAttribute("aria-label",visible?"Show password":"Hide password");});
+const question=document.querySelector("#challengeQuestion");
+const challengeId=document.querySelector("#challengeId");
+const challengeAnswer=document.querySelector("#challengeAnswer");
+const refreshChallenge=document.querySelector("#refreshChallenge");
+async function loadChallenge(){question.textContent="Loading…";challengeAnswer.value="";challengeAnswer.disabled=true;refreshChallenge.disabled=true;try{const r=await fetch("/api/auth/login-challenge",{cache:"no-store"});const j=await r.json();if(!r.ok)throw new Error();question.textContent=j.question;challengeId.value=j.id;challengeAnswer.disabled=false;challengeAnswer.focus();}catch{question.textContent="Unable to load";}finally{refreshChallenge.disabled=false;}}
+refreshChallenge.addEventListener("click",loadChallenge);
+loadChallenge();
 </script>
 <script src="/js/login.js?v=20260921"></script>
 </body>
