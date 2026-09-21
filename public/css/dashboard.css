@@ -116,3 +116,47 @@ table{max-width:100%}
 .client-footer{margin-top:54px;padding:28px 4px 8px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:25px;align-items:flex-start;color:var(--muted);font-size:10px}
 .client-footer div{display:grid;gap:6px}.client-footer strong{color:var(--navy);letter-spacing:.12em;font-size:10px}.client-footer nav{display:flex;gap:20px;flex-wrap:wrap}.client-footer a{color:var(--muted);text-decoration:none}.client-footer a:hover{color:var(--navy)}
 @media(max-width:700px){.client-footer{flex-direction:column}.client-footer nav{gap:14px}}
+
+/* Rocher Financial private-client layer */
+.client-app{background:linear-gradient(180deg,#f7f4ec 0%,#f3efe5 46%,#faf8f2 100%);color:#20303a}
+.client-app .dash-header{background:rgba(247,244,236,.88);border-color:rgba(18,47,67,.1)}
+.client-app .auth-brand>span{border-color:#c99b4e;background:#fffdf8}
+.client-nav{display:flex;gap:25px;font-size:12px;color:#66737a}
+.client-nav a{padding:10px 0;border-bottom:1px solid transparent}
+.client-nav a.active,.client-nav a:hover{color:#122f43;border-color:#c99b4e}
+.hero-dashboard{display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.hero-dashboard h1{letter-spacing:-.045em}
+.secure-badge{display:flex;align-items:center;gap:8px;background:#fffdf8;border:1px solid var(--line);padding:10px 13px;font-size:10px;color:#516068}
+.secure-badge span{width:7px;height:7px;border-radius:50%;background:#2c9876;box-shadow:0 0 0 4px rgba(44,152,118,.1)}
+.wealth-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(330px,.75fr);gap:18px;margin-bottom:18px}
+.wealth-card{position:relative;overflow:hidden;min-height:265px;padding:31px;background:linear-gradient(135deg,#122f43,#1d465e);color:#fff;box-shadow:0 25px 65px rgba(18,47,67,.16)}
+.wealth-card:after{content:"";position:absolute;width:280px;height:280px;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-90px;bottom:-150px}
+.wealth-card .eyebrow{color:#e8cf9c}
+.wealth-top{position:relative;z-index:1;display:flex;justify-content:space-between;gap:20px}
+.wealth-top h2{font:400 clamp(42px,5vw,66px)/1 Georgia,serif;margin:8px 0 0;letter-spacing:-.04em}
+.wealth-card .wealth-top>div:first-child{padding-left:0}
+.wealth-mark{position:absolute;right:22px;top:0!important;width:42px;height:42px;border:1px solid rgba(255,255,255,.28);display:grid;place-items:center;font:14px Georgia,serif;color:#e8cf9c!important}
+.icon-button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff}
+.wealth-bottom{position:absolute;bottom:27px;left:31px;right:31px;display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.15);padding-top:15px;font-size:10px;color:rgba(255,255,255,.58)}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-card{border:1px solid var(--line);background:rgba(255,253,248,.85);padding:20px;text-align:left;cursor:pointer;transition:.2s}
+.action-card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(18,47,67,.08);border-color:rgba(201,155,78,.55)}
+.action-card strong{display:grid;place-items:center;width:35px;height:35px;background:#dcecf3;color:#122f43;font-size:17px;margin-bottom:20px}
+.action-card span{display:block;color:#122f43;font-weight:800;font-size:12px}
+.action-card small{display:block;color:#7a858a;font-size:10px;margin-top:4px}
+.premium-stats .stat{background:rgba(255,253,248,.65)}
+.client-command{margin-top:22px;margin-bottom:22px;padding:42px 44px;display:flex;justify-content:space-between;align-items:center;gap:30px;background:#e7eee7;border:1px solid rgba(18,47,67,.08)}
+.client-command h2{font:400 clamp(34px,4vw,54px)/1.02 Georgia,serif;color:#122f43;margin:0;letter-spacing:-.04em}
+.client-command h2 em{color:#6f8468;font-style:normal}
+.client-command p:not(.eyebrow){max-width:580px;color:#65736f;margin:15px 0 0}
+.command-note{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.6);border:1px solid rgba(18,47,67,.1);padding:14px 17px;min-width:250px}
+.command-note>span{color:#2c9876;font-size:10px}
+.command-note b,.command-note small{display:block}
+.command-note b{font-size:11px;color:#122f43}.command-note small{font-size:9px;color:#718078;margin-top:3px}
+.network-panel{border-radius:0;background:#122f43!important;color:#fff!important;border:0!important;box-shadow:0 24px 60px rgba(18,47,67,.12)}
+.network-panel h2{font:400 38px Georgia,serif;color:#fff;margin:0}.network-panel .muted{color:rgba(255,255,255,.65)!important}
+.network-stats span{color:rgba(255,255,255,.6)}.network-stats b{color:#e8cf9c}
+.panel{box-shadow:0 12px 35px rgba(18,47,67,.035)}
+.client-footer{border-top:1px solid var(--line);margin-top:60px;padding-top:35px}
+@media(max-width:900px){.client-nav{display:none}.hero-dashboard{display:block}.secure-badge{display:inline-flex;margin-top:18px}.wealth-grid{grid-template-columns:1fr}.client-command{display:block}.command-note{margin-top:25px}}
+@media(max-width:520px){.wealth-card{min-height:230px;padding:24px}.wealth-top h2{font-size:42px}.wealth-bottom{left:24px;right:24px}.client-command{padding:30px 24px}.client-command h2{font-size:38px}.quick-actions{grid-template-columns:1fr 1fr}.action-card{padding:15px}.action-card strong{margin-bottom:14px}}
