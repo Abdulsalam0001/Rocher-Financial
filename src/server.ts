@@ -101,8 +101,9 @@ app.get("/api/auth/login-challenge", (_req, res) => {
 });
 
 app.post("/api/auth/login", async (req, res) => {
-  const { email, password, area } = req.body as { email?: string; password?: string; area?: "customer" | "admin" };
-  if (!email || !password || !area) return res.status(400).json({ error: "Email, password and login area are required." });
+  const { email, password, area, challengeId, challengeAnswer } = req.body as { email?: string; password?: string; area?: "customer" | "admin"; challengeId?: string; challengeAnswer?: string };
+  if (!email || !password || !area || !challengeId || challengeAnswer === undefined) return res.status(400).json({ error: "Email, password and security check are required." });
+  if (!consumeLoginChallenge(String(challengeId), String(challengeAnswer))) return res.status(401).json({ error: "Security check failed. Please complete a new challenge." });
 
   const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() }, include: { customer: true, staff: true } });
   if (!user || user.status !== "ACTIVE" || !verifyPassword(password, user.passwordHash)) {
