@@ -232,6 +232,6 @@ td{border-top-color:#e4e9ed}
 .sidebar-nav a.active{box-shadow:inset 3px 0 0 #fff;background:rgba(255,255,255,.12)}
 .sidebar-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.16);padding-top:14px;display:grid;gap:3px}
 .sidebar-bottom button{color:#dceeff}
-.client-app .dash-header{margin-left:238px;padding-left:32px}
+.client-app .dash-header{margin-left:238px;padding-left:32px}.client-app .client-nav{display:none}
 .client-app .dash{margin-left:238px;max-width:none;padding-left:42px;padding-right:42px}
 @media(max-width:850px){.desktop-sidebar{display:none}.client-app .dash-header{margin-left:0}.client-app .dash{margin-left:0}}
