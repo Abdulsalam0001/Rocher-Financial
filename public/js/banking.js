@@ -5,6 +5,7 @@ const money=(n,c)=>{try{return new Intl.NumberFormat(undefined,{style:"currency"
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function api(u,o={}){const r=await fetch(u,{headers:{"Content-Type":"application/json"},...o}),j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error||"Request failed"),{data:j});return j}
 function modal(id,on){$(id).classList.toggle("hidden",!on);document.body.classList.toggle("modal-open",on)}
+function alertModal(title,message,eyebrow="ROCHER MUTUEL"){$("#alertEyebrow").textContent=eyebrow;$("#alertTitle").textContent=title;$("#alertMessage").textContent=message;modal("#alertModal",true)}
 function render(){
  const A=S.data.accounts||[],a=A[0],total=a?A.filter(x=>x.currency===a.currency).reduce((n,x)=>n+Number(x.balanceMinor),0):0;
  $("#accountsGrid").innerHTML=A.map(x=>"<article class='account-card'><div class='account-card-top'><span class='label'>"+esc(x.type)+"</span><span class='account-status'>"+esc(x.status)+"</span></div><h3>"+x.currency+" ACCOUNT</h3><div class='balance'>"+(S.hide?"******":money(x.balanceMinor,x.currency))+"</div><div class='account-number'>"+esc(x.accountNumber)+"</div></article>").join("")||"<p>No accounts available.</p>";
@@ -20,15 +21,15 @@ function fill(){
 }
 function preview(){const a=S.data.accounts.find(x=>x.id===$("#sourceAccount").value),b=S.bens.find(x=>x.id===$("#beneficiary").value),n=Number($("#transferAmount").value||0);$("#transferPreview").innerHTML=a&&b?"<span>From <b>"+a.currency+" · "+a.accountNumber+"</b></span><span>To <b>"+esc(b.name)+"</b></span><span>Bank <b>"+esc(b.bankName)+"</b></span>"+(b.iban?"<span>IBAN <b>"+esc(b.iban)+"</b></span>":"")+(b.swiftBic?"<span>SWIFT/BIC <b>"+esc(b.swiftBic)+"</b></span>":"")+(n?"<span>Amount <b>"+money(n*100,a.currency)+"</b></span>":""):"<span>Add a beneficiary to begin.</span>"}
 function openTransfer(type,bid){
- if(!S.pin){modal("#pinModal",true);$("#pinTitle").textContent="Set Transfer PIN first";$("#pinMessage").textContent="A Transfer PIN is required before you can authorize a transfer.";return}
+ if(!S.pin){alertModal("Transfer PIN pending","Your Transfer PIN is issued by Rocher Mutuel Financial. Please contact customer care before initiating a transfer.","TRANSFER SECURITY");return}
  modal("#transferModal",true);$("#transferType").value=type||"WIRE";fill();if(bid)$("#beneficiary").value=bid;preview()
 }
 async function load(){
  const r=await fetch("/api/customer/me");if(!r.ok)return location.href="/login.html";S.data=await r.json();
- render();try{S.bens=await api("/api/customer/beneficiaries")}catch{}fill();
- try{const p=await api("/api/customer/transfer-pin");S.pin=p.configured;$("#pinStatus").textContent=S.pin?"PIN configured":"PIN not set";$("#pinStatus").className="status-pill "+(S.pin?"completed":"pending");$("#openPin").textContent=S.pin?"Change Transfer PIN":"Set Transfer PIN"}catch{}
+ render();try{S.bens=await api("/api/customer/beneficiaries")}catch(x){alertModal("Beneficiaries unavailable",x.message,"ACCOUNT NOTICE")}fill();
+ try{const p=await api("/api/customer/transfer-pin");S.pin=p.configured;$("#pinStatus").textContent=S.pin?"PIN issued":"PIN pending";$("#pinStatus").className="status-pill "+(S.pin?"completed":"pending")}catch{}
 }
-$$("[data-open-transfer]").forEach(x=>x.onclick=()=>openTransfer(x.dataset.openTransfer));
+$("[data-open-transfer]").forEach(x=>x.onclick=()=>openTransfer(x.dataset.openTransfer));
 ["#transferType","#sourceAccount","#beneficiary","#transferAmount"].forEach(x=>$(x).addEventListener("input",preview));
 $$("[data-close-modal]").forEach(x=>x.onclick=()=>modal("#"+x.dataset.closeModal,false));
 $("#transferForm").onsubmit=e=>{
@@ -40,8 +41,11 @@ $("#transferForm").onsubmit=e=>{
 };
 $("#confirmForm").onsubmit=async e=>{
  e.preventDefault();$("#confirmMessage").textContent="Authorizing transfer...";
- try{const j=await api("/api/customer/transfers",{method:"POST",body:JSON.stringify({...S.pending,transferPin:$("#transferPin").value})});$("#confirmMessage").textContent="Transfer completed - "+j.reference;await load();setTimeout(()=>modal("#confirmModal",false),900)}
- catch(x){$("#confirmMessage").textContent=x.data?.message||x.message}
+ try{
+ const j=await api("/api/customer/transfers",{method:"POST",body:JSON.stringify({...S.pending,transferPin:$("#transferPin").value})});
+ modal("#confirmModal",false);await load();
+ alertModal("Transfer processing",j.message||("Transfer "+j.reference+" is now processing. Please contact customer care for assistance."),"TRANSFER RECEIVED");
+ }catch(x){modal("#confirmModal",false);alertModal("Transfer not completed",x.data?.message||x.message,"TRANSFER NOTICE")}
 };
 $("#openPin").onclick=()=>{const c=S.pin;$("#pinTitle").textContent=c?"Change Transfer PIN":"Set Transfer PIN";$("#currentPinWrap").classList.toggle("hidden",!c);$("#pinForm").reset();modal("#pinModal",true)};
 $("#pinForm").onsubmit=async e=>{
@@ -49,10 +53,11 @@ $("#pinForm").onsubmit=async e=>{
  try{await api("/api/customer/transfer-pin",{method:"POST",body:JSON.stringify({pin:p,currentPin:f.get("currentPin")||undefined})});S.pin=true;$("#pinStatus").textContent="PIN configured";$("#pinStatus").className="status-pill completed";$("#openPin").textContent="Change Transfer PIN";$("#pinMessage").textContent="Transfer PIN saved.";setTimeout(()=>modal("#pinModal",false),700)}catch(x){$("#pinMessage").textContent=x.message}
 };
 $("#beneficiaryForm").onsubmit=async e=>{
- e.preventDefault();try{await api("/api/customer/beneficiaries",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});S.bens=await api("/api/customer/beneficiaries");fill();modal("#beneficiaryModal",false)}catch(x){$("#beneficiaryMessage").textContent=x.message}
+ e.preventDefault();try{await api("/api/customer/beneficiaries",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});S.bens=await api("/api/customer/beneficiaries");fill();modal("#beneficiaryModal",false);alertModal("Beneficiary saved","The recipient is now available for transfers.","RECIPIENT")}catch(x){modal("#beneficiaryModal",false);alertModal("Could not save beneficiary",x.message,"RECIPIENT")}
 };
 $("#openBeneficiary").onclick=$("#openBeneficiary2").onclick=()=>modal("#beneficiaryModal",true);
 $("#beneficiaryList").onclick=e=>{const b=e.target.closest("[data-bid]");if(b)openTransfer("WIRE",b.dataset.bid)};
 $("#toggleBalance").onclick=()=>{S.hide=!S.hide;render()};
 load()
+$("[data-close-modal]").forEach(x=>x.onclick=()=>modal("#"+x.dataset.closeModal,false));
 })()
