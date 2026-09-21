@@ -3,7 +3,8 @@
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
   const S={data:null,bens:[],pin:false,pending:null,hide:false,loading:true};
-  const money=(minor,currency)=>{try{return new Intl.NumberFormat(undefined,{style:"currency",currency}).format(Number(minor)/100)}catch{return `${currency} ${(Number(minor)/100).toFixed(2)}`}};
+  const esc=v=>String(v??"").replace(/[&<>"]/g,c=>c==="&"?"&amp;":c==="<"?"&lt;":c===">"?"&gt;":"&quot;");
+  const escText=v=>esc(String(v??""));
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'":"&#39;",`"`:"&quot;"}[c]));
   const api=async(url,options={})=>{
     const controller=new AbortController();
