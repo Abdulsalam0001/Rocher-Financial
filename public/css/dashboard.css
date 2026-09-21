@@ -34,3 +34,81 @@ table{max-width:100%}
 }
 
 .security-panel{margin-top:22px}.security-panel .muted{margin:8px 0 0}.password-form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.password-form .button{grid-column:span 1}.password-form .form-message{grid-column:1/-1}@media(max-width:850px){.password-form{grid-template-columns:1fr 1fr}.password-form .button{grid-column:span 2}}@media(max-width:520px){.password-form{grid-template-columns:1fr}.password-form .button{grid-column:auto}}
+
+/* Rocher private-client banking prototype */
+.client-app{background:var(--ivory)}
+.client-app .dash-header{min-height:72px}
+.client-nav{display:flex;gap:24px;margin-left:28px;font-size:12px;color:var(--muted);letter-spacing:.03em}
+.client-nav a.active,.client-nav a:hover{color:var(--navy)}
+.hero-dashboard{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:32px}
+.hero-dashboard h1{margin-bottom:8px}
+.secure-badge{border:1px solid var(--line);background:rgba(255,253,248,.7);padding:10px 14px;font-size:11px;color:var(--muted)}
+.secure-badge span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);margin-right:7px}
+.wealth-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(420px,1fr);gap:18px;margin-bottom:18px}
+.wealth-card{background:var(--navy);color:#fff;padding:34px;border:1px solid rgba(184,148,82,.35);box-shadow:0 24px 55px rgba(16,35,63,.14)}
+.wealth-top{display:flex;justify-content:space-between;align-items:flex-start}
+.wealth-card .eyebrow{color:#d8bb82}
+.wealth-card h2{font:400 clamp(38px,5vw,62px)/1.05 Georgia,serif;margin:10px 0 30px;color:#fff}
+.wealth-bottom{display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.16);padding-top:15px;font-size:11px;color:rgba(255,255,255,.68)}
+.icon-button{border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;width:38px;height:38px;cursor:pointer}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-card{border:1px solid var(--line);background:var(--pearl);padding:18px;text-align:left;color:var(--navy);cursor:pointer;display:grid;gap:5px}
+.action-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.action-card strong{font-size:20px;color:var(--gold);font-weight:500}
+.action-card span{font-weight:800;font-size:12px;letter-spacing:.05em}
+.action-card small{font-size:11px;color:var(--muted)}
+.premium-stats{grid-template-columns:repeat(4,1fr);margin-bottom:18px}
+.premium-stats .stat{background:rgba(255,253,248,.65)}
+.network-panel{display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px;background:#edf0ee;border:1px solid var(--line);padding:28px 30px;margin-bottom:22px}
+.network-panel h2{font:400 30px Georgia,serif;color:var(--navy);margin:0 0 8px}
+.network-panel .muted{max-width:680px;margin:0}
+.network-stats{display:flex;gap:26px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.network-stats span{display:grid;gap:5px}
+.network-stats b{font:400 22px Georgia,serif;color:var(--navy)}
+.section-note{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.account-card{transition:.18s ease}
+.account-card:hover{transform:translateY(-2px);box-shadow:0 14px 35px rgba(16,35,63,.07)}
+.account-card-top{display:flex;justify-content:space-between;gap:10px}
+.account-status{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--success)}
+.two-column{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.beneficiary-list{display:grid;gap:8px}
+.beneficiary{width:100%;display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);background:var(--ivory);text-align:left;color:var(--navy);cursor:pointer}
+.beneficiary:hover{border-color:var(--gold)}
+.beneficiary-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font:15px Georgia}
+.beneficiary span:nth-child(2){display:grid;gap:3px}
+.beneficiary small{font-size:10px;color:var(--muted)}
+.beneficiary>b{font-size:20px;color:var(--gold);font-weight:400}
+.transfer-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.transfer-options button{border:1px solid var(--line);background:var(--ivory);padding:18px;text-align:left;cursor:pointer;color:var(--navy);display:grid;gap:5px}
+.transfer-options button:hover{border-color:var(--gold)}
+.transfer-options b{font-size:11px;letter-spacing:.12em}
+.transfer-options span{font-size:10px;color:var(--muted)}
+.table-sub{display:block;color:var(--muted);font-size:9px;margin-top:3px;text-transform:uppercase;letter-spacing:.08em}
+.mono{font-family:ui-monospace,SFMono-Regular,monospace;font-size:10px}
+.status-pill{display:inline-flex;align-items:center;padding:5px 9px;border:1px solid var(--line);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.status-pill.completed{color:var(--success);background:rgba(47,125,98,.06)}
+.status-pill.pending,.status-pill.processing{color:#8b6d2e;background:rgba(184,148,82,.08)}
+.status-pill.failed,.status-pill.cancelled{color:var(--danger)}
+.security-actions{display:flex;align-items:center;gap:15px;font-size:11px;color:var(--muted)}
+.modal-open{overflow:hidden}
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,35,63,.48);backdrop-filter:blur(8px);z-index:30;display:grid;place-items:center;padding:20px}
+.modal-backdrop.hidden{display:none}
+.modal{position:relative;width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--pearl);border:1px solid rgba(184,148,82,.35);padding:34px;box-shadow:0 30px 90px rgba(16,35,63,.25)}
+.modal.compact{width:min(470px,100%)}
+.modal h2{font:400 36px Georgia,serif;color:var(--navy);margin:0 0 8px}
+.modal form{margin-top:24px}
+.modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border:1px solid var(--line);background:transparent;color:var(--navy);font-size:22px;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.transfer-preview{display:grid;gap:7px;padding:15px;background:var(--ivory);border:1px solid var(--line);font-size:11px;color:var(--muted)}
+.transfer-preview span{display:flex;justify-content:space-between;gap:15px}
+.transfer-preview b{color:var(--navy)}
+.confirmation-summary{display:grid;gap:0;border:1px solid var(--line);margin-top:20px}
+.confirmation-summary div{display:flex;justify-content:space-between;gap:20px;padding:13px 15px;border-bottom:1px solid var(--line);font-size:11px}
+.confirmation-summary div:last-child{border-bottom:0}
+.confirmation-summary span{color:var(--muted)}
+.confirmation-summary strong{color:var(--navy);text-align:right}
+.empty-state{padding:18px;background:var(--ivory);border:1px dashed var(--line);color:var(--muted);font-size:11px;line-height:1.6}
+.hidden{display:none!important}
+@media(max-width:1000px){.wealth-grid{grid-template-columns:1fr}.premium-stats{grid-template-columns:1fr 1fr}.network-panel{grid-template-columns:1fr}.network-stats{flex-wrap:wrap}.client-nav{display:none}}
+@media(max-width:700px){.two-column{grid-template-columns:1fr}.hero-dashboard{align-items:flex-start;flex-direction:column}.secure-badge{align-self:stretch}.quick-actions{grid-template-columns:1fr 1fr}.network-panel{padding:22px}.network-stats{gap:18px}.modal{padding:26px 20px}.form-row{grid-template-columns:1fr}.security-actions{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.premium-stats{grid-template-columns:1fr 1fr}.wealth-card{padding:24px}.wealth-card h2{font-size:38px}.quick-actions{gap:8px}.action-card{padding:14px}.network-panel h2{font-size:25px}.client-app .dash{padding-top:38px}}
