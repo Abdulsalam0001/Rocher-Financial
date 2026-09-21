@@ -160,3 +160,21 @@ table{max-width:100%}
 .client-footer{border-top:1px solid var(--line);margin-top:60px;padding-top:35px}
 @media(max-width:900px){.client-nav{display:none}.hero-dashboard{display:block}.secure-badge{display:inline-flex;margin-top:18px}.wealth-grid{grid-template-columns:1fr}.client-command{display:block}.command-note{margin-top:25px}}
 @media(max-width:520px){.wealth-card{min-height:230px;padding:24px}.wealth-top h2{font-size:42px}.wealth-bottom{left:24px;right:24px}.client-command{padding:30px 24px}.client-command h2{font-size:38px}.quick-actions{grid-template-columns:1fr 1fr}.action-card{padding:15px}.action-card strong{margin-bottom:14px}}
+
+/* Refined Rocher Mutuel transfer experience */
+.client-command{margin:22px 0;padding:42px 44px;display:flex;justify-content:space-between;align-items:center;gap:30px;background:#e7eee7;border:1px solid rgba(18,47,67,.08)}
+.client-command h2{font:400 clamp(34px,4vw,54px)/1.02 Georgia,serif;color:#122f43;margin:0;letter-spacing:-.04em}
+.client-command h2 em{color:#6f8468;font-style:normal}
+.client-command p:not(.eyebrow){max-width:580px;color:#65736f;margin:15px 0 0}
+.command-note{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.62);border:1px solid rgba(18,47,67,.1);padding:14px 17px;min-width:250px}
+.command-note>span{color:#2c9876;font-size:10px}.command-note b,.command-note small{display:block}.command-note b{font-size:11px;color:#122f43}.command-note small{font-size:9px;color:#718078;margin-top:3px}
+.transfer-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.transfer-secure{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#39765f;border:1px solid rgba(57,118,95,.2);background:rgba(57,118,95,.05);padding:7px 9px;white-space:nowrap}
+.transfer-secure span{font-size:8px;margin-right:4px}
+.transfer-steps{display:grid;grid-template-columns:auto 1fr auto 1fr auto;align-items:center;gap:9px;margin:24px 0 4px;padding:11px 12px;background:#f5f2ea;border:1px solid var(--line)}
+.transfer-steps span{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#889196;white-space:nowrap}.transfer-steps span.current{color:#122f43;font-weight:800}.transfer-steps b{font:400 11px Georgia,serif;margin-right:4px}.transfer-steps i{height:1px;background:var(--line)}
+.modal label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#66737a}
+.modal input,.modal select{margin-top:7px}
+.transfer-submit{display:flex!important;justify-content:space-between;align-items:center;width:100%}.transfer-submit strong{font-size:18px;font-weight:400}
+#transferAmount{font-size:18px;font-family:Georgia,serif}
+@media(max-width:600px){.client-command{display:block;padding:30px 24px}.command-note{margin-top:24px;min-width:0}.transfer-modal-head{display:block}.transfer-secure{display:inline-block;margin-top:10px}.transfer-steps{grid-template-columns:1fr;gap:5px}.transfer-steps i{display:none}.transfer-steps span{padding:4px 0}.modal h2{font-size:30px}}
