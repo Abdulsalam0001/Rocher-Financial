@@ -220,7 +220,7 @@ app.post("/api/admin/balances/adjust", requireRole("ADMIN"), async (req, res) =>
   const result = await prisma.$transaction(async (tx) => {
     const updated = await tx.account.update({
       where: { id: accountId },
-      data: { balanceMinor: { [direction === "CREDIT" ? "increment" : "decrement"]: amountMinor } }
+      data: { balanceMinor: direction === "CREDIT" ? { increment: amountMinor } : { decrement: amountMinor } }
     });
     const transaction = await tx.transaction.create({
       data: {
