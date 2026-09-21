@@ -32,3 +32,5 @@ table{max-width:100%}
   .demo-tools .button{width:100%}
   .demo-check{white-space:normal}
 }
+
+.security-panel{margin-top:22px}.security-panel .muted{margin:8px 0 0}.password-form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.password-form .button{grid-column:span 1}.password-form .form-message{grid-column:1/-1}@media(max-width:850px){.password-form{grid-template-columns:1fr 1fr}.password-form .button{grid-column:span 2}}@media(max-width:520px){.password-form{grid-template-columns:1fr}.password-form .button{grid-column:auto}}
