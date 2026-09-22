@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Private Client | Rocher Mutuel Financial</title>
+<title>Accounts Overview | Rocher Mutuel Financial</title>
 <link rel="stylesheet" href="/css/app.css">
-<link rel="stylesheet" href="/css/dashboard.css?v=20260925">
+<link rel="stylesheet" href="/css/dashboard.css?v=20260926">
 </head>
 <body class="client-app">
 <aside class="desktop-sidebar" aria-label="Customer banking navigation">
@@ -14,7 +14,7 @@
   <nav class="sidebar-nav">
     <a class="active" href="#overview"><span>⌂</span> Overview</a>
     <a href="#accounts"><span>▣</span> Accounts</a>
-    <a href="#transfers"><span>↗</span> Transfers</a>
+    <a href="#transfers"><span>↗</span> Pay &amp; Transfer</a>
     <a href="#activity"><span>≡</span> Activity</a>
   </nav>
   <div class="sidebar-bottom"><a href="/security.html"><span>✓</span> Security</a><button id="sidebarLogout" type="button"><span>↪</span> Log out</button></div>
@@ -25,7 +25,7 @@
   <nav class="client-nav">
     <a class="active" href="#overview">Overview</a>
     <a href="#accounts">Accounts</a>
-    <a href="#transfers">Transfers</a>
+    <a href="#transfers">Pay &amp; Transfer</a>
     <a href="#activity">Activity</a>
   </nav>
   <button id="logout" class="ghost">Log out</button>
@@ -34,14 +34,14 @@
 <main class="dash">
   <section id="overview" class="welcome hero-dashboard">
     <div>
-      <p class="eyebrow">PRIVATE CLIENT · ROCHER MUTUEL FINANCIAL</p>
+      <p class="eyebrow">ACCOUNTS OVERVIEW</p>
       <h1 id="welcome">Welcome.</h1>
       <p class="muted" id="email"></p>
     </div>
     <div class="secure-badge"><span></span> Secure private banking</div>
   </section>
 
-  <section class="wealth-grid">
+  <section class="retail-balance"><div><p class="eyebrow">TOTAL AVAILABLE</p><h2 id="totalBalance">—</h2><p id="primaryAccount" class="balance-meta">Primary account</p></div><button id="toggleBalance" class="balance-visibility" type="button" aria-label="Hide balances"><span class="balance-eye">◉</span><span class="balance-visibility-label">Hide</span></button></section><section class="retail-summary"><article><span>Available balance</span><strong id="availableCash">—</strong></article><article><span>Pending transfers</span><strong id="pendingCount">0</strong></article><article><span>Active accounts</span><strong id="accountCount">0</strong></article><article><span>Base currency</span><strong id="baseCurrency">EUR</strong></article></section><section class="wealth-grid hidden">
     <article class="wealth-card">
       <div class="wealth-top"><div><p class="eyebrow">TOTAL AVAILABLE WEALTH</p><h2 id="totalBalance">—</h2></div><button id="toggleBalance" class="balance-visibility" type="button" aria-label="Hide balances"><span class="balance-eye">◉</span><span class="balance-visibility-label">Hide</span></button></div>
       <div class="wealth-bottom">
@@ -57,27 +57,27 @@
     </div>
   </section>
 
-  <section class="stat-grid premium-stats">
+  <section class="stat-grid premium-stats hidden">
     <article class="stat"><span>Available balance</span><strong id="availableCash">—</strong></article>
     <article class="stat"><span>Pending transfers</span><strong id="pendingCount">0</strong></article>
     <article class="stat"><span>Active accounts</span><strong id="accountCount">0</strong></article>
     <article class="stat"><span>Base currency</span><strong id="baseCurrency">EUR</strong></article>
   </section>
 
-  <section class="client-command"><div><p class="eyebrow">YOUR FINANCIAL HOME</p><h2>Everything important.<br><em>In one place.</em></h2><p>Accounts, balances, recipients and transfers — arranged around the way you actually bank.</p></div><div class="command-note"><span>●</span><div><b>Connection protected</b><small>Your private banking session is active.</small></div></div></section>
+  <section class="client-command hidden"><div><p class="eyebrow">YOUR FINANCIAL HOME</p><h2>Everything important.<br><em>In one place.</em></h2><p>Accounts, balances, recipients and transfers — arranged around the way you actually bank.</p></div><div class="command-note"><span>●</span><div><b>Connection protected</b><small>Your private banking session is active.</small></div></div></section>
 
-  <section class="network-panel">
+  <section class="network-panel hidden">
     <div><div><p class="eyebrow">GLOBAL ACCESS</p><h2>International banking, presented simply.</h2><p class="muted">SWIFT, SEPA, international wire and internal transfers are presented in one private-client experience.</p></div></div>
     <div class="network-stats"><span><b>04</b> Currencies</span><span><b>24/7</b> Digital access</span><span><b>GLOBAL</b> Transfer options</span></div>
   </section>
 
   <section id="legacyAccounts" class="hidden" aria-hidden="true"></section>
-  <section id="accounts" class="panel">
+  <section id="accounts" class="panel retail-section">
     <div class="panel-head"><div><p class="eyebrow">ACCOUNTS</p><h2>Accounts & balances</h2></div><span class="section-note">EUR · USD · GBP · CHF</span></div>
     <div id="accountsGrid" class="account-grid"></div>
   </section>
 
-  <section class="two-column">
+  <section class="two-column retail-secondary">
     <section class="panel">
       <div class="panel-head"><div><p class="eyebrow">BENEFICIARIES</p><h2>Recipients</h2></div><button class="button small" id="openBeneficiary2" type="button">＋ Add</button></div>
       <div id="beneficiaryList" class="beneficiary-list"></div>
@@ -93,7 +93,7 @@
     </section>
   </section>
 
-  <section id="activity" class="panel">
+  <section id="activity" class="panel retail-section">
     <div class="panel-head"><div><p class="eyebrow">ACTIVITY</p><h2>Recent transactions</h2></div><span class="section-note">Latest 10</span></div>
     <div class="table-wrap"><table><thead><tr><th>Date</th><th>Reference</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody id="transactions"></tbody></table></div>
   </section>
@@ -143,6 +143,6 @@
   </div>
 </div>
 <div class="modal-backdrop hidden" id="alertModal"><div class="modal compact"><button class="modal-close" data-close-modal="alertModal" type="button">×</button><p class="eyebrow" id="alertEyebrow">ROCHER MUTUEL FINANCIAL</p><h2 id="alertTitle">Notice</h2><p class="muted" id="alertMessage"></p><button class="button" data-close-modal="alertModal" type="button">Continue</button></div></div>
-<script src="/js/dashboard.js?v=20260923"></script><script src="/js/banking.js?v=20260925"></script>
+<script src="/js/dashboard.js?v=20260923"></script><script src="/js/banking.js?v=20260926"></script>
 </body>
 </html>
