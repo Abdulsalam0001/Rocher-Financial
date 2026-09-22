@@ -14,6 +14,29 @@ const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..
 const secret = process.env.SESSION_SECRET ?? "prototype-session-secret";
 const cookieName = "rm_session";
 
+const loginChallenges = new Map<string, { answer: string; expiresAt: number }>();
+
+function createLoginChallenge() {
+  const a = Math.floor(Math.random() * 9) + 2;
+  const b = Math.floor(Math.random() * 9) + 1;
+  const operation = Math.random() > 0.5 ? "+" : "−";
+  const answer = operation === "+" ? a + b : a - b;
+  const id = randomBytes(18).toString("hex");
+  loginChallenges.set(id, { answer: String(answer), expiresAt: Date.now() + 5 * 60 * 1000 });
+  return { id, question: `${a} ${operation} ${b} = ?` };
+}
+
+function consumeLoginChallenge(id: string, answer: string) {
+  const challenge = loginChallenges.get(id);
+  if (!challenge || challenge.expiresAt < Date.now()) {
+    if (id) loginChallenges.delete(id);
+    return false;
+  }
+  loginChallenges.delete(id);
+  return challenge.answer === String(answer).trim();
+}
+
+
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(morgan("combined"));
@@ -69,13 +92,22 @@ async function audit(userId: string, action: string, resource: string, resourceI
   await prisma.auditLog.create({ data: { userId, action, resource, resourceId } });
 }
 
+app.get("/api/auth/login-challenge", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(createLoginChallenge());
+});
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "rocher-mutuel-financial", environment: process.env.NODE_ENV ?? "development" });
 });
 
 app.post("/api/auth/login", async (req, res) => {
-  const { email, password, area } = req.body as { email?: string; password?: string; area?: "customer" | "admin" };
+  const { email, password, area, challengeId, challengeAnswer } = req.body as { email?: string; password?: string; area?: "customer" | "admin"; challengeId?: string; challengeAnswer?: string };
   if (!email || !password || !area) return res.status(400).json({ error: "Email, password and login area are required." });
+  if (area === "customer") {
+    if (!challengeId || challengeAnswer === undefined) return res.status(400).json({ error: "Email, password and security check are required." });
+    if (!consumeLoginChallenge(String(challengeId), String(challengeAnswer))) return res.status(401).json({ error: "Security check failed. Please complete a new challenge." });
+  }
 
   const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() }, include: { customer: true, staff: true } });
   if (!user || user.status !== "ACTIVE" || !verifyPassword(password, user.passwordHash)) {
