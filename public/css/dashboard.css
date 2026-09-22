@@ -381,3 +381,36 @@ td{border-top-color:#e4e9ed}
   .client-app .balance-visibility-label{display:none}
   .client-app .balance-visibility{width:32px;height:32px;padding:0}
 }
+
+
+/* Admin customer list + password editor */
+.admin-app #customersPanel .table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);background:var(--pearl)}
+.admin-app #customersPanel table{width:100%;min-width:760px;table-layout:auto}
+.admin-app #customersPanel th{white-space:nowrap;padding:13px 14px;background:var(--ivory)}
+.admin-app #customersPanel td{padding:14px;vertical-align:middle}
+.admin-app #customersPanel td:first-child{min-width:150px}
+.admin-app #customersPanel td:nth-child(2){min-width:210px}
+.admin-app #customersPanel td:nth-child(6){width:150px;text-align:right}
+.admin-app #customersPanel .change-password{white-space:nowrap;min-height:38px;padding:9px 13px}
+.admin-app .security-panel{scroll-margin-top:95px}
+.admin-app .security-panel .panel-head{align-items:flex-start}
+.admin-app .password-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto;align-items:end}
+.admin-app .password-form input{min-width:0}
+.admin-app .password-form .button,.admin-app .password-form .ghost{min-height:54px;white-space:nowrap}
+.admin-app .password-form .form-message{grid-column:1/-1}
+@media(max-width:850px){
+  .admin-app #customersPanel .table-wrap{margin:0 -2px}
+  .admin-app .password-form{grid-template-columns:1fr 1fr}
+  .admin-app .password-form .button{grid-column:auto}
+  .admin-app .password-form .ghost{grid-column:auto}
+}
+@media(max-width:560px){
+  .admin-app #customersPanel .panel-head{flex-direction:column}
+  .admin-app #customersPanel .panel-head .button{width:100%}
+  .admin-app #customersPanel .table-wrap{border-left:0;border-right:0}
+  .admin-app .security-panel{padding:20px 16px}
+  .admin-app .security-panel .panel-head{display:block}
+  .admin-app .security-panel .panel-head h2{font-size:25px;line-height:1.15}
+  .admin-app .password-form{grid-template-columns:1fr}
+  .admin-app .password-form .button,.admin-app .password-form .ghost{width:100%;grid-column:auto}
+}
