@@ -1,3 +1,61 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Login | Rocher Mutuel Financial</title><link rel="stylesheet" href="/css/app.css"></head>
-<body class="auth-page admin-page"><main class="auth-shell"><a class="auth-brand" href="/"><span>RM</span><div>ROCHER MUTUEL<small>ADMINISTRATION</small></div></a><section class="auth-card"><p class="eyebrow">ADMINISTRATION</p><h1>Secure staff access.</h1><p class="muted">Authorized administrators only.</p><form id="loginForm"><label>Email<input name="email" type="email" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="button" type="submit">Enter administration</button><p id="message" class="form-message"></p></form></section><p class="auth-note">There is no public administrator registration.</p></main><script src="/js/admin-login.js"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login | Rocher Mutuel Financial</title>
+<link rel="stylesheet" href="/css/app.css?v=20260922">
+</head>
+<body class="auth-page admin-page">
+<main class="auth-shell">
+  <a class="auth-brand" href="/"><span>RM</span><div>ROCHER MUTUEL<small>ADMINISTRATION</small></div></a>
+  <section class="auth-card">
+    <p class="eyebrow">ADMINISTRATION</p>
+    <h1>Secure staff access.</h1>
+    <p class="muted">Authorized administrators only.</p>
+    <form id="loginForm">
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Password<input id="passwordInput" name="password" type="password" autocomplete="current-password" required></label>
+      <div class="security-challenge" id="securityChallenge">
+        <div class="security-challenge-head">
+          <div><span class="challenge-kicker">RM SECURITY CHECK</span><strong>Confirm you’re human</strong></div>
+          <button type="button" id="refreshChallenge" class="challenge-refresh" aria-label="Get a new security challenge">↻ New</button>
+        </div>
+        <div class="challenge-box"><span id="challengeQuestion">Loading…</span><span class="challenge-equals">Answer</span></div>
+        <input id="challengeAnswer" name="challengeAnswer" inputmode="numeric" autocomplete="off" placeholder="Enter your answer" required>
+        <input id="challengeId" name="challengeId" type="hidden">
+      </div>
+      <button class="button" type="submit">Enter administration</button>
+      <p id="message" class="form-message"></p>
+    </form>
+  </section>
+  <p class="auth-note">There is no public administrator registration.</p>
+</main>
+<script>
+const form=document.querySelector("#loginForm"),message=document.querySelector("#message");
+const question=document.querySelector("#challengeQuestion"),challengeId=document.querySelector("#challengeId"),challengeAnswer=document.querySelector("#challengeAnswer"),refreshChallenge=document.querySelector("#refreshChallenge");
+async function loadChallenge(){
+  question.textContent="Loading…";challengeId.value="";challengeAnswer.value="";challengeAnswer.disabled=true;refreshChallenge.disabled=true;
+  try{
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+    const r=await fetch("/api/auth/login-challenge",{cache:"no-store",headers:{"Accept":"application/json"},signal:controller.signal});
+    clearTimeout(timer);const j=await r.json();
+    if(!r.ok||!j.id||!j.question)throw new Error();
+    question.textContent=j.question;challengeId.value=j.id;challengeAnswer.disabled=false;
+  }catch(e){question.textContent="Unable to load";}
+  finally{refreshChallenge.disabled=false}
+}
+refreshChallenge.addEventListener("click",loadChallenge);
+form.addEventListener("submit",async e=>{
+  e.preventDefault();message.textContent="Signing in…";
+  const data=Object.fromEntries(new FormData(form));
+  try{
+    const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify({...data,area:"admin"})});
+    const j=await r.json();if(!r.ok)throw new Error(j.error||"Unable to sign in.");
+    location.href=j.redirect;
+  }catch(err){message.textContent=err.message;if(String(err.message).toLowerCase().includes("security"))loadChallenge();}
+});
+loadChallenge();
+</script>
+</body>
+</html>
