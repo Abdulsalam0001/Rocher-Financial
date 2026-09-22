@@ -53,7 +53,7 @@
     if($("#primaryAccount"))$("#primaryAccount").textContent=primary?`${primary.currency} · ${primary.accountNumber}`:"Primary account";
     if($("#pendingCount"))$("#pendingCount").textContent=String(transactions.filter(t=>["PENDING","PROCESSING"].includes(t.status)).length);
     const tx=$("#transactions");
-    if(tx)tx.innerHTML=transactions.length?transactions.map(t=>`<tr><td>${new Date(t.createdAt).toLocaleDateString()}</td><td class="mono">${esc(t.reference)}</td><td>${esc(t.description||t.type)}</td><td>${money(t.amountMinor,t.currency)}</td><td><span class="status-pill ${String(t.status||"").toLowerCase()}">${esc(t.status)}</span></td></tr>`).join(""):`<tr><td colspan="5"><div class="empty-state">No transaction activity is available yet.</div></td></tr>`;
+    if(tx)tx.innerHTML=transactions.length?transactions.map(t=>`<tr><td>${new Date(t.createdAt).toLocaleDateString()}</td><td class="mono">${esc(t.reference)}</td><td class="transaction-amount">${money(t.amountMinor,t.currency)}</td><td>${esc(t.description||t.type)}</td><td><span class="status-pill ${String(t.status||"").toLowerCase()}">${esc(t.status)}</span></td></tr>`).join(""):`<tr><td colspan="5"><div class="empty-state">No transaction activity is available yet.</div></td></tr>`;
   };
   const fill=()=>{
     const accounts=Array.isArray(S.data?.accounts)?S.data.accounts:[];
