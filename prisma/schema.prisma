@@ -276,3 +276,12 @@ model ContactMessage {
   updatedAt DateTime @updatedAt
   @@index([status, createdAt])
 }
+
+
+model CurrencySetting {
+  id        String   @id @default(cuid())
+  code      String   @unique @db.VarChar(3)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
