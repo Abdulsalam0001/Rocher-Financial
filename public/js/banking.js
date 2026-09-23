@@ -59,10 +59,11 @@
   };
   const fill=()=>{
     const accounts=Array.isArray(S.data?.accounts)?S.data.accounts:[];
-    const source=$("#sourceAccount"),beneficiary=$("#beneficiary"),list=$("#beneficiaryList"),currency=$("#beneficiaryCurrency");
+    const source=$("#sourceAccount"),beneficiary=$("#beneficiary"),list=$("#beneficiaryList"),currency=$("#beneficiaryCurrency"),recipientCurrency=$("#recipientCurrency");
     if(source)source.innerHTML=accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.currency)} · ${esc(a.accountNumber)} · ${money(a.balanceMinor,a.currency)}</option>`).join("");
     if(beneficiary)beneficiary.innerHTML=(S.bens.length?S.bens.map(b=>`<option value="${esc(b.id)}">${esc(b.name)} · ${esc(b.bankName)} · ${esc(b.currency)}</option>`).join(""):"")+`<option value="ONE_TIME">One-time recipient · not saved</option>`;
     if(currency)currency.innerHTML=(S.currencies.length?S.currencies:["EUR","USD"]).map(code=>`<option value="${esc(code)}">${esc(code)}</option>`).join("");
+    if(recipientCurrency)recipientCurrency.innerHTML=`<option value="">Select currency</option>`+(S.currencies.length?S.currencies:["EUR","USD"]).map(code=>`<option value="${esc(code)}">${esc(code)}</option>`).join("");
     if(list)list.innerHTML=S.bens.length?S.bens.map(b=>`<button class="beneficiary" type="button" data-bid="${esc(b.id)}"><span class="beneficiary-avatar">${esc((b.name||"?").charAt(0).toUpperCase())}</span><span><strong>${esc(b.name)}</strong><small>${esc(b.bankName)} · ${esc(b.country)}</small></span><b>›</b></button>`).join(""):`<div class="empty-state">No beneficiaries yet. Add a recipient to start a transfer.</div>`;
   };
   const preview=()=>{
@@ -81,7 +82,7 @@
   const openTransfer=(type,bid)=>{
     if(!S.data){setDashboardStatus("Your banking data is still loading.","loading");return}
     if(!S.pin){location.href="/transfer-pin-pending.html";return}
-    modal("#transferModal",true);if($("#transferType"))$("#transferType").value=type||"WIRE";fill();if(bid&&$("#beneficiary"))$("#beneficiary").value=bid;preview();
+    modal("#transferModal",true);if($("#transferType"))$("#transferType").value=type||"WIRE";fill();if(bid&&$("#beneficiary"))$("#beneficiary").value=bid;syncRecipientMode();
   };
   async function load(){
     S.loading=true;setDashboardStatus("Loading your accounts, balances and recent activity...","loading");
