@@ -9,7 +9,6 @@ import { PrismaClient } from "@prisma/client";
 
 const app = express();
 app.set("trust proxy", 1);
-app.set("trust proxy", 1);
 const port = Number(process.env.PORT ?? 3000);
 const prisma = new PrismaClient();
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../public");
@@ -296,9 +295,48 @@ app.get("/api/customer/me", requireRole("CUSTOMER"), async (_req, res) => {
 });
 
 
+const DEFAULT_CURRENCIES = ["EUR", "USD", "GBP", "CHF", "NGN", "CAD", "AUD"];
+
+async function getSupportedCurrencies() {
+  let rows = await prisma.currencySetting.findMany({ where: { enabled: true }, orderBy: { code: "asc" } });
+  if (!rows.length) {
+    await prisma.currencySetting.createMany({ data: DEFAULT_CURRENCIES.map(code => ({ code, enabled: true })), skipDuplicates: true });
+    rows = await prisma.currencySetting.findMany({ where: { enabled: true }, orderBy: { code: "asc" } });
+  }
+  return rows.map(row => row.code);
+}
+
 function validTransferType(value: unknown) {
   return ["WIRE", "SWIFT", "SEPA", "INTERNAL"].includes(String(value).toUpperCase());
 }
+
+app.get("/api/customer/currencies", requireRole("CUSTOMER"), async (_req, res) => {
+  res.json({ currencies: await getSupportedCurrencies() });
+});
+
+app.get("/api/admin/currencies", requireRole("ADMIN"), async (_req, res) => {
+  let currencies = await prisma.currencySetting.findMany({ orderBy: [{ enabled: "desc" }, { code: "asc" }] });
+  if (!currencies.length) {
+    await getSupportedCurrencies();
+    currencies = await prisma.currencySetting.findMany({ orderBy: [{ enabled: "desc" }, { code: "asc" }] });
+  }
+  res.json(currencies);
+});
+
+app.post("/api/admin/currencies", requireRole("ADMIN"), async (req, res) => {
+  const session = res.locals.session as { userId: string };
+  const raw = Array.isArray(req.body?.currencies) ? req.body.currencies : String(req.body?.currencies ?? "").split(",");
+  const codes = [...new Set(raw.map((v: unknown) => String(v).trim().toUpperCase()).filter((v: string) => /^[A-Z]{3}$/.test(v)))];
+  if (!codes.length) return res.status(400).json({ error: "Add at least one valid 3-letter currency code." });
+  await prisma.$transaction(async tx => {
+    await tx.currencySetting.updateMany({ data: { enabled: false } });
+    for (const code of codes) {
+      await tx.currencySetting.upsert({ where: { code }, create: { code, enabled: true }, update: { enabled: true } });
+    }
+  });
+  await audit(session.userId, "UPDATE_SUPPORTED_CURRENCIES", "CURRENCY_SETTINGS", codes.join(","));
+  res.json({ ok: true, currencies: await getSupportedCurrencies() });
+});
 
 app.get("/api/customer/transfer-pin", requireRole("CUSTOMER"), async (_req, res) => {
   const session = res.locals.session as { userId: string };
@@ -336,7 +374,8 @@ app.post("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (req, res
   if (!name || !bankName || !country || !accountNumber) {
     return res.status(400).json({ error: "Beneficiary name, bank, country and account number are required." });
   }
-  if (!/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: "Currency must be a 3-letter code." });
+  const supportedCurrencies = await getSupportedCurrencies();
+  if (!supportedCurrencies.includes(currency)) return res.status(400).json({ error: "That currency is not currently enabled by administration." });
   if (!validTransferType(transferType)) return res.status(400).json({ error: "Unsupported transfer type." });
 
   const beneficiary = await prisma.beneficiary.create({
@@ -429,6 +468,8 @@ app.get("/api/admin/customers", requireRole("ADMIN"), async (_req, res) => {
 app.post("/api/admin/customers", requireRole("ADMIN"), async (req, res) => {
   const session = res.locals.session as { userId: string };
   const { firstName, lastName, email, password, phone, country, accountType = "CURRENT", currency = "EUR", generateHistory = false } = req.body;
+  const supportedCurrencies = await getSupportedCurrencies();
+  if (!supportedCurrencies.includes(String(currency).toUpperCase())) return res.status(400).json({ error: "That currency is not currently enabled by administration." });
   if (!firstName || !lastName || !email || !password) return res.status(400).json({ error: "First name, last name, email and temporary password are required." });
   if (String(password).length < 8) return res.status(400).json({ error: "Temporary password must be at least 8 characters." });
   const normalizedEmail = String(email).trim().toLowerCase();
