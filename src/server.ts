@@ -18,7 +18,7 @@ const loginChallenges = new Map<string, { answer: string; expiresAt: number }>()
 
 function createLoginChallenge() {
   const a = Math.floor(Math.random() * 9) + 2;
-  const b = Math.floor(Math.random() * 9) + 1;
+  const b = Math.floor(Math.random() * a) + 1;
   const operation = Math.random() > 0.5 ? "+" : "−";
   const answer = operation === "+" ? a + b : a - b;
   const id = randomBytes(18).toString("hex");
@@ -528,8 +528,8 @@ app.get("/api/admin/balances", requireRole("ADMIN"), async (_req, res) => {
 
 app.post("/api/admin/balances/adjust", requireRole("ADMIN"), async (req, res) => {
   const session = res.locals.session as { userId: string };
-  const { accountId, direction, amount, description } = req.body as {
-    accountId?: string; direction?: "CREDIT" | "DEBIT"; amount?: string | number; description?: string;
+  const { accountId, direction, amount, description, effectiveAt } = req.body as {
+    accountId?: string; direction?: "CREDIT" | "DEBIT"; amount?: string | number; description?: string; effectiveAt?: string;
   };
   if (!accountId || !direction || amount === undefined) return res.status(400).json({ error: "Account, direction and amount are required." });
   if (!["CREDIT", "DEBIT"].includes(direction)) return res.status(400).json({ error: "Direction must be CREDIT or DEBIT." });
@@ -543,6 +543,10 @@ app.post("/api/admin/balances/adjust", requireRole("ADMIN"), async (req, res) =>
   const amountMinor = BigInt(Math.round(numericAmount * 100));
   if (amountMinor <= 0n) return res.status(400).json({ error: "Amount is too small." });
   if (direction === "DEBIT" && account.balanceMinor < amountMinor) return res.status(400).json({ error: "Insufficient balance for this debit." });
+
+  const effectiveDate = effectiveAt ? new Date(String(effectiveAt)) : new Date();
+  if (Number.isNaN(effectiveDate.getTime())) return res.status(400).json({ error: "Transaction date is invalid." });
+  if (effectiveDate.getTime() > Date.now()) return res.status(400).json({ error: "Backdated history cannot use a future date." });
 
   const reference = `RM-${Date.now()}-${randomBytes(4).toString("hex").toUpperCase()}`;
   const result = await prisma.$transaction(async (tx) => {
@@ -559,7 +563,13 @@ app.post("/api/admin/balances/adjust", requireRole("ADMIN"), async (req, res) =>
         amountMinor,
         currency: account.currency,
         description: description?.trim() || (direction === "CREDIT" ? "Admin credit" : "Admin debit"),
-        metadata: { source: "admin_balance_adjustment", direction, adminUserId: session.userId }
+        metadata: {
+          source: effectiveAt ? "admin_backdated_adjustment" : "admin_balance_adjustment",
+          direction,
+          adminUserId: session.userId,
+          backdated: Boolean(effectiveAt)
+        },
+        createdAt: effectiveDate
       }
     });
     await tx.ledgerEntry.create({
@@ -568,14 +578,21 @@ app.post("/api/admin/balances/adjust", requireRole("ADMIN"), async (req, res) =>
         accountId,
         amountMinor,
         currency: account.currency,
-        direction
+        direction,
+        createdAt: effectiveDate
       }
     });
     return updated;
   });
 
   await audit(session.userId, `BALANCE_${direction}`, "ACCOUNT", accountId);
-  res.status(201).json({ ok: true, accountId, balanceMinor: result.balanceMinor.toString(), reference });
+  res.status(201).json({
+    ok: true,
+    accountId,
+    balanceMinor: result.balanceMinor.toString(),
+    reference,
+    effectiveAt: effectiveDate
+  });
 });
 
 app.get("/api/admin/history", requireRole("ADMIN"), async (_req, res) => {
