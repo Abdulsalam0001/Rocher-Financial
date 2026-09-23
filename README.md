@@ -333,3 +333,29 @@ Before considering a deployment stable:
 - Test restores, not just backup creation.
 - Treat payment and financial integrations as controlled server-side operations.
 - Keep prototype assumptions clearly separated from verified institutional claims.
+
+
+## Security, anti-phishing and search safety
+
+The public site includes `/security.html` and a customer-login security reminder. It explicitly tells visitors that Rocher will never request passwords, online-banking usernames, card PINs, CVVs, complete card details, or one-time security codes through unsolicited communications.
+
+### Google reCAPTCHA
+
+Customer login supports optional server-verified Google reCAPTCHA in addition to the existing customer security challenge. Admin login remains separate and does not receive the customer challenge or reCAPTCHA requirement.
+
+Configure these Render environment variables to enable it:
+
+```text
+RECAPTCHA_SITE_KEY=<Google reCAPTCHA site key>
+RECAPTCHA_SECRET_KEY=<Google reCAPTCHA secret key>
+```
+
+Without those keys, the existing customer challenge continues to work and Google reCAPTCHA is not called. reCAPTCHA is an anti-abuse control, not a Google endorsement or proof that an institution is legitimate.
+
+### Search-engine hygiene
+
+`public/robots.txt` and `public/sitemap.xml` keep public informational pages discoverable while excluding admin, API, dashboard, CSS and JavaScript paths. Connect the official domain to Google Search Console and monitor Security Issues, Manual Actions and unexpected indexed URLs.
+
+### Security headers and login protection
+
+Helmet applies a Content Security Policy, frame protection, object restrictions and strict-origin referrer policy. Customer and admin authentication requests also have a lightweight server-side rate limit to slow repeated login attempts.
