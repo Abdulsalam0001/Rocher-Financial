@@ -21,7 +21,7 @@ function populateDemo(){
   form.elements.accountType.value=pick(["CURRENT","SAVINGS","PRIVATE"]);
   form.elements.currency.value=pick(["EUR","EUR","USD","GBP"]);
   document.querySelector("#generateHistory").checked=true;
-  document.querySelector("#createMessage").textContent="Demo customer populated. Review the details, then create the customer.";
+  document.querySelector("#createMessage").textContent="Demo customer populated. Review the details, then create the customer.";RMAlert?.info("Demo customer ready","Review the generated details before creating the customer.");
 }
 async function ensureAdmin(){const r=await fetch("/api/admin/overview");if(r.status===401){location.href="/admin/login.html";return false}return r.ok}
 document.querySelector("#populateDemo").addEventListener("click",populateDemo);
@@ -36,7 +36,7 @@ document.querySelector("#createCustomer").addEventListener("submit",async e=>{
   m.textContent=r.ok
     ?"Customer created. Account: "+j.accountNumber+(j.historyGenerated?" · Demo history generated.":"")
     :j.error||"Unable to create customer.";
-  if(r.ok)e.currentTarget.reset();
+  if(r.ok){RMAlert?.success("Customer created","Account: "+j.accountNumber+(j.historyGenerated?" · Demo history generated.":""));e.currentTarget.reset();}else RMAlert?.error("Customer could not be created",j.error||"Unable to create customer.");
 });
 document.querySelector("#logout").onclick=async()=>{await fetch("/api/auth/logout",{method:"POST"});location.href="/admin/login.html"};
 ensureAdmin();
