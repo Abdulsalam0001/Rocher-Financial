@@ -402,6 +402,11 @@ app.post("/api/admin/customers/:customerId/transfer-pin", requireRole("ADMIN"), 
   res.json({ ok: true, message: "Transfer PIN issued for the customer." });
 });
 
+app.get("/api/admin/contact-messages", requireRole("ADMIN"), async (_req, res) => {
+  const messages=await prisma.contactMessage.findMany({orderBy:{createdAt:"desc"},take:100});
+  res.json(messages);
+});
+
 app.get("/api/admin/overview", requireRole("ADMIN"), async (_req, res) => {
   const [customers, accounts, transactions, auditLogs] = await Promise.all([
     prisma.customer.count(), prisma.account.count(), prisma.transaction.count(), prisma.auditLog.count()
