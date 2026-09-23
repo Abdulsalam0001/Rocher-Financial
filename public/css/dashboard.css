@@ -508,3 +508,6 @@ td{border-top-color:#e4e9ed}
   }
   .client-app .mobile-nav-toggle span{background:var(--navy)}
 }
+
+.form-hint{grid-column:1/-1;margin:-4px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+@media(max-width:1000px){.balance-form .form-hint{grid-column:1/-1}}
