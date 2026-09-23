@@ -36,3 +36,24 @@ passwordForm.addEventListener("submit",async e=>{
   passwordMessage.textContent=r.ok?j.message:(j.error||"Unable to change password.");
   if(r.ok){e.currentTarget.reset();setTimeout(()=>document.querySelector("#cancelPasswordChange").click(),900);await load()}
 });
+
+async function loadCurrencySettings(){
+  const input=document.querySelector("#supportedCurrencies"), message=document.querySelector("#currencyMessage");
+  if(!input)return;
+  try{const rows=await get("/api/admin/currencies");if(rows)input.value=rows.filter(x=>x.enabled).map(x=>x.code).join(", ");}
+  catch(error){if(message)message.textContent=error.message||"Unable to load currency settings.";}
+}
+document.querySelector("#currencySettingsForm")?.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const message=document.querySelector("#currencyMessage"), button=e.currentTarget.querySelector("button[type=submit]");
+  if(button)button.disabled=true;
+  if(message)message.textContent="Saving currencies…";
+  try{
+    const response=await fetch("/api/admin/currencies",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currencies:e.currentTarget.currencies.value})});
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.error||"Unable to save currencies.");
+    if(message)message.textContent="Supported currencies updated.";
+  }catch(error){if(message)message.textContent=error.message||"Unable to save currencies."}
+  finally{if(button)button.disabled=false;}
+});
+loadCurrencySettings();
