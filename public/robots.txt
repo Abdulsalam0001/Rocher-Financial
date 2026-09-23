@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard.html
+Disallow: /api/
+Disallow: /js/
+Disallow: /css/
+
+Sitemap: /sitemap.xml
