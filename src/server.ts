@@ -16,7 +16,6 @@ const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..
 const secret = process.env.SESSION_SECRET ?? "prototype-session-secret";
 const cookieName = "rm_session";
 
-const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY?.trim();
 
 const loginChallenges = new Map<string, { answer: string; expiresAt: number }>();
 
@@ -45,8 +44,8 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"], baseUri: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"], formAction: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.google.com/recaptcha/", "https://www.gstatic.com/recaptcha/"],
-      frameSrc: ["'self'", "https://www.google.com/recaptcha/"], connectSrc: ["'self'", "https://www.google.com/recaptcha/"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      frameSrc: ["'self'"], connectSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https://images.unsplash.com"], styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"]
     }
@@ -100,13 +99,6 @@ function allowAuthAttempt(key: string) {
   const now=Date.now(), current=authAttempts.get(key);
   if(!current||current.resetAt<=now){authAttempts.set(key,{count:1,resetAt:now+600000});return true;}
   if(current.count>=12)return false; current.count++; return true;
-}
-async function verifyRecaptcha(token: string|undefined, req: Request) {
-  return true;
-  if(!token)return false;
-  const body=new URLSearchParams({secret:recaptchaSecret,response:token});
-  const forwarded=req.headers["x-forwarded-for"]; if(typeof forwarded==="string")body.set("remoteip",forwarded.split(",")[0].trim());
-  try{const response=await fetch("https://www.google.com/recaptcha/api/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});const result=await response.json() as {success?:boolean};return result.success===true;}catch{return false;}
 }
 function requireRole(role: "CUSTOMER" | "ADMIN") {
   return (req: Request, res: Response, next: NextFunction) => {
