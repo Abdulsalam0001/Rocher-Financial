@@ -128,10 +128,10 @@
 </div>
 
 <div class="modal-backdrop hidden" id="beneficiaryModal">
-  <div class="modal"><button class="modal-close" data-close-modal="beneficiaryModal" type="button">×</button><p class="eyebrow">RECIPIENT</p><h2>Add beneficiary</h2><p class="muted">Save a recipient for future prototype transfers.</p>
+  <div class="modal"><button class="modal-close" data-close-modal="beneficiaryModal" type="button">×</button><p class="eyebrow">RECIPIENT</p><h2>Add beneficiary</h2><p class="muted">Save a recipient for future transfers. Available currencies are controlled by Rocher administration.</p>
     <form id="beneficiaryForm">
       <div class="form-row"><label>Name<input name="name" required placeholder="Beneficiary name"></label><label>Country<input name="country" required placeholder="Monaco"></label></div>
-      <div class="form-row"><label>Bank name<input name="bankName" required placeholder="Bank name"></label><label>Currency<select name="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option><option>NGN</option><option>CAD</option><option>AUD</option></select></label></div>
+      <div class="form-row"><label>Bank name<input name="bankName" required placeholder="Bank name"></label><label>Currency<select id="beneficiaryCurrency" name="currency" required><option value="">Loading currencies…</option></select></label></div>
       <label>Account number<input name="accountNumber" required placeholder="Account number"></label>
       <div class="form-row"><label>IBAN<input name="iban" placeholder="Optional IBAN"></label><label>SWIFT / BIC<input name="swiftBic" placeholder="Optional SWIFT/BIC"></label></div>
       <label>Bank address<input name="bankAddress" placeholder="Optional bank address"></label>
