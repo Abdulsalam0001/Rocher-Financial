@@ -517,3 +517,60 @@ td{border-top-color:#e4e9ed}
 @media(max-width:1000px){.balance-date-field{min-width:0}}
 
 .dashboard-history-panel{margin-top:18px}.dashboard-history-panel .table-wrap{max-height:460px}.transfer-fee-notice{margin-top:12px;padding:13px 15px;border:1px solid rgba(201,155,78,.42);background:#fbf7ec;color:var(--navy);font-size:12px;line-height:1.55}.transfer-fee-notice.hidden{display:none}.transfer-fee-notice strong{display:block;margin-bottom:3px}.transfer-pin-support{font-size:11px;line-height:1.6;color:var(--muted);margin:0}.transfer-pin-support a{color:var(--navy);font-weight:800}.wealth-grid{margin-bottom:12px}.stat-grid.premium-stats{margin-top:0}.client-footer{display:none!important}@media(min-width:851px){.dashboard-history-panel{margin-top:18px}.dashboard-history-panel .table-wrap{overflow-y:auto}}@media(max-width:850px){.dashboard-history-panel{margin-top:16px}.dashboard-history-panel .table-wrap{max-height:none}}
+
+/* Large primary dashboard actions — matched to Transfer */
+.client-app .quick-actions .action-card,
+.client-app .transfer-options button{
+  min-height:128px;
+  padding:24px;
+  border:1px solid rgba(18,47,67,.12);
+  background:linear-gradient(145deg,#fffdf8 0%,#f7f3ea 100%);
+  box-shadow:0 10px 28px rgba(18,47,67,.07);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  gap:7px;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.client-app .quick-actions .action-card:hover,
+.client-app .transfer-options button:hover{
+  transform:translateY(-3px);
+  border-color:rgba(201,155,78,.58);
+  box-shadow:0 16px 34px rgba(18,47,67,.12);
+}
+.client-app .quick-actions .action-card strong{
+  width:44px;
+  height:44px;
+  margin:0 0 8px;
+  background:#dcecf3;
+  color:#122f43;
+  font-size:19px;
+}
+.client-app .quick-actions .action-card span{
+  font-size:14px;
+  letter-spacing:.04em;
+}
+.client-app .quick-actions .action-card small{
+  font-size:11px;
+  line-height:1.45;
+}
+.client-app .transfer-options button{
+  min-height:112px;
+}
+.client-app .transfer-options button b{font-size:13px}
+.client-app .transfer-options button span{font-size:11px;line-height:1.45}
+@media(max-width:1050px){
+  .client-app .quick-actions .action-card{min-height:118px}
+}
+@media(max-width:700px){
+  .client-app .quick-actions .action-card,
+  .client-app .transfer-options button{min-height:116px;padding:20px}
+}
+@media(max-width:520px){
+  .client-app .quick-actions .action-card{min-height:112px;padding:17px 14px}
+  .client-app .quick-actions .action-card strong{width:38px;height:38px;font-size:16px;margin-bottom:5px}
+  .client-app .quick-actions .action-card span{font-size:12px}
+  .client-app .quick-actions .action-card small{font-size:9px}
+  .client-app .transfer-options button{min-height:104px;padding:17px 14px}
+}
