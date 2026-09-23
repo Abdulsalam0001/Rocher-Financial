@@ -48,3 +48,30 @@
 
 /* SweetAlert2 Rocher treatment */
 .rm-swal-confirm{background:var(--navy)!important;color:#fff!important;border-radius:0!important;font:800 12px "DM Sans",Inter,sans-serif!important;padding:12px 24px!important}.rm-swal-cancel{border-radius:0!important;font:800 12px "DM Sans",Inter,sans-serif!important}.swal2-popup{border-radius:0!important;border:1px solid var(--line)!important;box-shadow:0 28px 80px rgba(18,47,67,.18)!important}.swal2-title{font-family:"Playfair Display",Georgia,serif!important;color:var(--navy)!important}.swal2-html-container{font-family:"DM Sans",Inter,sans-serif!important;color:var(--muted)!important}
+/* Rocher premium form controls and action buttons */
+.button,button[type="submit"],input[type="submit"],.action-button{
+  position:relative;min-height:52px;padding:0 24px;border:1px solid transparent;
+  background:linear-gradient(135deg,#173b51 0%,#122f43 100%);color:#fff;
+  font:800 12px/1 "DM Sans",Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  cursor:pointer;box-shadow:0 12px 28px rgba(18,47,67,.16);
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease,opacity .18s ease;
+}
+.button::after,button[type="submit"]::after,input[type="submit"]::after,.action-button::after{
+  content:"→";font-size:16px;line-height:1;transition:transform .18s ease;
+}
+.button:hover,button[type="submit"]:hover,input[type="submit"]:hover,.action-button:hover{
+  transform:translateY(-2px);box-shadow:0 16px 34px rgba(18,47,67,.22);background:linear-gradient(135deg,#1d4b63 0%,#173b51 100%);
+}
+.button:hover::after,button[type="submit"]:hover::after,input[type="submit"]:hover::after,.action-button:hover::after{transform:translateX(4px)}
+.button:active,button[type="submit"]:active,input[type="submit"]:active,.action-button:active{transform:translateY(0)}
+.button:focus-visible,button[type="submit"]:focus-visible,input[type="submit"]:focus-visible,.action-button:focus-visible{outline:3px solid rgba(228,164,69,.35);outline-offset:3px}
+.button:disabled,button[type="submit"]:disabled,input[type="submit"]:disabled,.action-button:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+.button.small{min-height:44px;padding:0 18px}
+.secondary-button,.button.secondary{background:transparent!important;color:var(--navy)!important;border-color:var(--line)!important;box-shadow:none!important}
+.secondary-button::after,.button.secondary::after{color:var(--gold)}
+.auth-card button[type="submit"],.contact-card button[type="submit"]{width:100%;margin-top:8px}
+.status-card .button{margin-top:8px}
+@media(max-width:620px){
+ .button,button[type="submit"],input[type="submit"],.action-button{min-height:50px;padding:0 20px}
+}
