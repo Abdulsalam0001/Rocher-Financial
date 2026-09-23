@@ -1,6 +1,6 @@
 const money=(minor,currency)=>new Intl.NumberFormat(undefined,{style:"currency",currency}).format(Number(minor)/100);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-async function load(){const r=await fetch("/api/admin/balances");if(r.status===401){location.href="/admin/login.html";return}const d=await r.json();if(!r.ok){document.querySelector("#balanceMessage").textContent=d.error||"Unable to load balances.";return}
+async function load(){const r=await fetch("/api/admin/balances");if(r.status===401){location.href="/admin/login.html";return}const d=await r.json();if(!r.ok){document.querySelector("#balanceMessage").textContent=d.error||"Unable to load balances.";RMAlert?.error("Balances unavailable",d.error||"Unable to load balances.");return}
 document.querySelector("#accountCount").textContent=d.accounts.length;document.querySelector("#historyCount").textContent=d.history.length;document.querySelector("#creditCount").textContent=d.history.filter(x=>x.direction==="CREDIT").length;document.querySelector("#debitCount").textContent=d.history.filter(x=>x.direction==="DEBIT").length;
 document.querySelector("#accountId").innerHTML='<option value="">Select account</option>'+d.accounts.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.accountNumber)+' — '+esc(a.customer?.name||"Unassigned")+' — '+money(a.balanceMinor,a.currency)+'</option>').join("");
 document.querySelector("#accounts").innerHTML=d.accounts.map(a=>'<tr><td><strong>'+esc(a.customer?.name||"Unassigned")+'</strong></td><td>'+esc(a.accountNumber)+'</td><td>'+esc(a.type)+'</td><td>'+esc(a.currency)+'</td><td>'+money(a.balanceMinor,a.currency)+'</td><td class="status">'+esc(a.status)+'</td></tr>').join("")||'<tr><td colspan="6">No accounts.</td></tr>';
@@ -13,5 +13,5 @@ if(body.effectiveAt){
 }
 const r=await fetch("/api/admin/balances/adjust",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
 const j=await r.json();
-m.textContent=r.ok?(body.effectiveAt?"Historical adjustment posted. Reference: ":"Adjustment posted. Reference: ")+j.reference:j.error||"Unable to post adjustment.";if(r.ok){e.currentTarget.reset();await load()}});
+m.textContent=r.ok?(body.effectiveAt?"Historical adjustment posted. Reference: ":"Adjustment posted. Reference: ")+j.reference:j.error||"Unable to post adjustment.";if(r.ok){RMAlert?.success(body.effectiveAt?"Historical adjustment posted":"Adjustment posted","Reference: "+j.reference);e.currentTarget.reset();await load()}else RMAlert?.error("Adjustment failed",j.error||"Unable to post adjustment.");});
 document.querySelector("#logout").onclick=async()=>{await fetch("/api/auth/logout",{method:"POST"});location.href="/admin/login.html"};load();
