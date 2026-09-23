@@ -10,7 +10,9 @@
     const controller=new AbortController();
     const timer=setTimeout(()=>controller.abort(),12000);
     try{
-      const response=await fetch(url,{credentials:"same-origin",...options,signal:controller.signal});
+      const requestOptions={credentials:"same-origin",...options,signal:controller.signal};
+      if(requestOptions.body && typeof requestOptions.body!=="string"){requestOptions.body=JSON.stringify(requestOptions.body);requestOptions.headers={"Content-Type":"application/json",...(requestOptions.headers||{})};}
+      const response=await fetch(url,requestOptions);
       const raw=await response.text();
       let data={};try{data=raw?JSON.parse(raw):{}}catch{}
       if(!response.ok)throw Object.assign(new Error(data.error||data.message||`Request failed (${response.status})`),{status:response.status,data});
@@ -57,9 +59,10 @@
   };
   const fill=()=>{
     const accounts=Array.isArray(S.data?.accounts)?S.data.accounts:[];
-    const source=$("#sourceAccount"),beneficiary=$("#beneficiary"),list=$("#beneficiaryList");
+    const source=$("#sourceAccount"),beneficiary=$("#beneficiary"),list=$("#beneficiaryList"),currency=$("#beneficiaryCurrency");
     if(source)source.innerHTML=accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.currency)} · ${esc(a.accountNumber)} · ${money(a.balanceMinor,a.currency)}</option>`).join("");
     if(beneficiary)beneficiary.innerHTML=S.bens.length?S.bens.map(b=>`<option value="${esc(b.id)}">${esc(b.name)} · ${esc(b.bankName)} · ${esc(b.currency)}</option>`).join(""):`<option value="">Add a beneficiary first</option>`;
+    if(currency)currency.innerHTML=(S.currencies.length?S.currencies:["EUR","USD"]).map(code=>`<option value="${esc(code)}">${esc(code)}</option>`).join("");
     if(list)list.innerHTML=S.bens.length?S.bens.map(b=>`<button class="beneficiary" type="button" data-bid="${esc(b.id)}"><span class="beneficiary-avatar">${esc((b.name||"?").charAt(0).toUpperCase())}</span><span><strong>${esc(b.name)}</strong><small>${esc(b.bankName)} · ${esc(b.country)}</small></span><b>›</b></button>`).join(""):`<div class="empty-state">No beneficiaries yet. Add a recipient to start a transfer.</div>`;
   };
   const preview=()=>{
@@ -82,9 +85,10 @@
       const me=await api("/api/customer/me");
       if(!me?.customer)throw new Error("Customer profile could not be loaded.");
       S.data=me;render();
-      const results=await Promise.allSettled([api("/api/customer/beneficiaries"),api("/api/customer/transfer-pin")]);
+      const results=await Promise.allSettled([api("/api/customer/beneficiaries"),api("/api/customer/transfer-pin"),api("/api/customer/currencies")]);
       if(results[0].status==="fulfilled")S.bens=Array.isArray(results[0].value)?results[0].value:[];else S.bens=[];
       if(results[1].status==="fulfilled"){S.pin=Boolean(results[1].value.configured);}
+      if(results[2].status==="fulfilled"){S.currencies=Array.isArray(results[2].value.currencies)?results[2].value.currencies:[];}
       fill();
       setDashboardStatus(S.data.accounts.length ? "Account data updated securely." : "No accounts are linked to this customer yet.","success");
       setTimeout(()=>$("#dashboardDataStatus")?.remove(),3000);
@@ -105,7 +109,8 @@
     if(amount*100>Number(account.balanceMinor)){if(message)message.textContent="The transfer amount exceeds the available balance.";return}
     S.pending={sourceAccountId:account.id,beneficiaryId:beneficiary.id,transferType:$("#transferType").value,amount,reference:$("#transferReference").value.trim(),sourceCurrency:account.currency,targetCurrency:beneficiary.currency};
     const conversion=beneficiary.currency!==account.currency;
-    $("#confirmationSummary").innerHTML=`<div><span>Method</span><strong>${esc(S.pending.transferType)}</strong></div><div><span>From</span><strong>${esc(account.currency)} · ${esc(account.accountNumber)}</strong></div><div><span>Beneficiary</span><strong>${esc(beneficiary.name)}</strong></div><div><span>Bank</span><strong>${esc(beneficiary.bankName)}</strong></div><div><span>Amount</span><strong>${money(amount*100,account.currency)}</strong></div>${conversion?`<div class="conversion-confirmation"><span>Currency conversion</span><strong>${esc(account.currency)} → ${esc(beneficiary.currency)}</strong><small>A currency-conversion service fee will be deducted from the source account before processing. The applicable charge will be confirmed before processing.</small></div>`:""}`;
+    const feeText=conversion?`<div class="conversion-confirmation"><span>Currency conversion</span><strong>${esc(account.currency)} → ${esc(beneficiary.currency)}</strong><small>A currency-conversion service fee will be deducted from the source account. The charge will be confirmed before processing.</small></div>`:"";
+    $("#confirmationSummary").innerHTML=`<div><span>Method</span><strong>${esc(S.pending.transferType)}</strong></div><div><span>From</span><strong>${esc(account.currency)} · ${esc(account.accountNumber)}</strong></div><div><span>Beneficiary</span><strong>${esc(beneficiary.name)}</strong></div><div><span>Bank</span><strong>${esc(beneficiary.bankName)}</strong></div><div><span>Amount</span><strong>${money(amount*100,account.currency)}</strong></div>${feeText}`;
     $("#transferPin").value="";$("#confirmMessage").textContent="";modal("#transferModal",false);modal("#confirmModal",true);setTimeout(()=>$("#transferPin")?.focus(),50);
   });
   $("#confirmForm")?.addEventListener("submit",async e=>{
