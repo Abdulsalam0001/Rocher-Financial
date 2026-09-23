@@ -326,7 +326,7 @@ app.get("/api/admin/currencies", requireRole("ADMIN"), async (_req, res) => {
 app.post("/api/admin/currencies", requireRole("ADMIN"), async (req, res) => {
   const session = res.locals.session as { userId: string };
   const raw = Array.isArray(req.body?.currencies) ? req.body.currencies : String(req.body?.currencies ?? "").split(",");
-  const codes = [...new Set(raw.map((v: unknown) => String(v).trim().toUpperCase()).filter((v: string) => /^[A-Z]{3}$/.test(v)))];
+  const codes: string[] = [...new Set(raw.map((v: unknown) => String(v).trim().toUpperCase()).filter((v: string) => /^[A-Z]{3}$/.test(v)))];
   if (!codes.length) return res.status(400).json({ error: "Add at least one valid 3-letter currency code." });
   await prisma.$transaction(async tx => {
     await tx.currencySetting.updateMany({ data: { enabled: false } });
