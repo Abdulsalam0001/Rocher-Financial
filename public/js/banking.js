@@ -81,6 +81,7 @@
     box.innerHTML=`<span>From <b>${esc(account.currency)} · ${esc(account.accountNumber)}</b></span><span>To <b>${esc(recipient.name||"One-time recipient")}</b></span><span>Bank <b>${esc(recipient.bankName||"—")}</b></span>${oneTime?`<span>Account <b>${esc($("#recipientAccountNumber")?.value?.trim()||"—")}</b></span>`:""}${recipient.iban?`<span>IBAN <b>${esc(recipient.iban)}</b></span>`:""}${recipient.swiftBic?`<span>SWIFT/BIC <b>${esc(recipient.swiftBic)}</b></span>`:""}${amount?`<span>Amount <b>${money(amount*100,account.currency)}</b></span>`:""}${conversion?`<span class="transfer-warning">Currency conversion: ${esc(account.currency)} → ${esc(targetCurrency)}</span>`:""}${oneTime&&!complete?`<span class="transfer-warning">Complete the one-time recipient details before reviewing.</span>`:""}`;
     const fee=$("#transferFeeNotice");if(fee){fee.classList.toggle("hidden",!conversion);fee.innerHTML=conversion?`<strong>Currency conversion service fee applies</strong>A service fee will be deducted from the source account for the ${esc(account.currency)} → ${esc(targetCurrency)} conversion. The applicable charge will be shown/confirmed before processing.`:"";}
   };
+  const syncRecipientMode=()=>{const one=$("#beneficiary")?.value==="ONE_TIME";$("#oneTimeRecipientFields")?.classList.toggle("hidden",!one);preview();};
   const openTransfer=(type,bid)=>{
     if(!S.data){setDashboardStatus("Your banking data is still loading.","loading");return}
     if(!S.pin){location.href="/transfer-pin-pending.html";return}
@@ -133,7 +134,6 @@
     e.preventDefault();const form=e.currentTarget,message=$("#beneficiaryMessage"),button=form.querySelector("button[type=submit]");if(button)button.disabled=true;if(message)message.textContent="Saving recipient...";
     try{await api("/api/customer/beneficiaries",{method:"POST",body:Object.fromEntries(new FormData(form))});S.bens=await api("/api/customer/beneficiaries");fill();form.reset();modal("#beneficiaryModal",false);RMAlert?.success("Beneficiary saved","The recipient is now available for transfers.")}catch(error){if(message)message.textContent=error.message||"Unable to save beneficiary.";RMAlert?.error("Unable to save beneficiary",error.message||"Please check the recipient details and try again.")}finally{if(button)button.disabled=false}
   });
-  const syncRecipientMode=()=>{const one=$("#beneficiary")?.value==="ONE_TIME";$("#oneTimeRecipientFields")?.classList.toggle("hidden",!one);preview();};
   const openBeneficiary=()=>modal("#beneficiaryModal",true);$("#openBeneficiary")?.addEventListener("click",openBeneficiary);$("#openBeneficiary2")?.addEventListener("click",openBeneficiary);
   $("#beneficiaryList")?.addEventListener("click",e=>{const item=e.target.closest("[data-bid]");if(item)openTransfer("WIRE",item.dataset.bid)});
   $("#toggleBalance")?.addEventListener("click",()=>{S.hide=!S.hide;const b=$("#toggleBalance");if(b)b.setAttribute("aria-label",S.hide?"Show balances":"Hide balances");render()});
