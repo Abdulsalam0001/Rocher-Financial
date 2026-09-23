@@ -574,3 +574,36 @@ td{border-top-color:#e4e9ed}
   .client-app .quick-actions .action-card small{font-size:9px}
   .client-app .transfer-options button{min-height:104px;padding:17px 14px}
 }
+
+/* Large transfer-form fields */
+.client-app .modal form input,
+.client-app .modal form select,
+.client-app .modal form textarea{
+  width:100%;
+  min-height:58px;
+  padding:0 17px;
+  border:1px solid rgba(18,47,67,.16);
+  border-radius:0;
+  background:#fffdf8;
+  color:var(--navy);
+  font:500 13px "DM Sans",Inter,sans-serif;
+  box-sizing:border-box;
+  outline:none;
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.client-app .modal form textarea{min-height:110px;padding:15px 17px;resize:vertical}
+.client-app .modal form input:focus,
+.client-app .modal form select:focus,
+.client-app .modal form textarea:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(201,155,78,.11);
+  background:#fff;
+}
+.client-app .modal form label{gap:9px;font-size:11px;letter-spacing:.03em}
+.client-app .modal .form-row{gap:16px}
+.client-app .modal form{gap:18px}
+@media(max-width:520px){
+  .client-app .modal form input,
+  .client-app .modal form select{min-height:56px;padding:0 15px}
+  .client-app .modal form textarea{min-height:100px}
+}
