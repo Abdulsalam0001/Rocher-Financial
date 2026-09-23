@@ -15,7 +15,7 @@ const prisma = new PrismaClient();
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../public");
 const secret = process.env.SESSION_SECRET ?? "prototype-session-secret";
 const cookieName = "rm_session";
-const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY?.trim();
+
 const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY?.trim();
 
 const loginChallenges = new Map<string, { answer: string; expiresAt: number }>();
@@ -102,7 +102,7 @@ function allowAuthAttempt(key: string) {
   if(current.count>=12)return false; current.count++; return true;
 }
 async function verifyRecaptcha(token: string|undefined, req: Request) {
-  if(!recaptchaSecret||!recaptchaSiteKey)return true;
+  return true;
   if(!token)return false;
   const body=new URLSearchParams({secret:recaptchaSecret,response:token});
   const forwarded=req.headers["x-forwarded-for"]; if(typeof forwarded==="string")body.set("remoteip",forwarded.split(",")[0].trim());
@@ -121,11 +121,19 @@ async function audit(userId: string, action: string, resource: string, resourceI
   await prisma.auditLog.create({ data: { userId, action, resource, resourceId } });
 }
 
-app.get("/api/security-config", (_req, res) => { res.setHeader("Cache-Control","no-store"); res.json({recaptchaEnabled:Boolean(recaptchaSecret&&recaptchaSiteKey),recaptchaSiteKey:recaptchaSiteKey??null}); });
-
 app.get("/api/auth/login-challenge", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json(createLoginChallenge());
+});
+
+
+app.post("/api/contact", async (req, res) => {
+  const name=String(req.body?.name??"").trim(), email=String(req.body?.email??"").trim().toLowerCase(), subject=String(req.body?.subject??"").trim(), message=String(req.body?.message??"").trim();
+  if(!name||!email||!subject||!message)return res.status(400).json({error:"Name, email, subject and message are required."});
+  if(name.length>120||email.length>254||subject.length>120||message.length>4000)return res.status(400).json({error:"One or more fields are too long."});
+  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return res.status(400).json({error:"Please enter a valid email address."});
+  const ticket=await prisma.contactMessage.create({data:{name,email,subject,message}});
+  res.status(201).json({ok:true,id:ticket.id});
 });
 
 app.get("/health", (_req, res) => {
@@ -133,11 +141,10 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/api/auth/login", async (req, res) => {
-  const { email, password, area, challengeId, challengeAnswer, recaptchaToken } = req.body as { email?: string; password?: string; area?: "customer" | "admin"; challengeId?: string; challengeAnswer?: string; recaptchaToken?: string };
+  const { email, password, area, challengeId, challengeAnswer } = req.body as { email?: string; password?: string; area?: "customer" | "admin"; challengeId?: string; challengeAnswer?: string };
   if (!email || !password || !area) return res.status(400).json({ error: "Email, password and login area are required." });
   if (!allowAuthAttempt(req.ip || "unknown")) return res.status(429).json({ error: "Too many login attempts. Please wait a few minutes and try again." });
   if (area === "customer") {
-    if (!(await verifyRecaptcha(recaptchaToken, req))) return res.status(401).json({ error: "Security verification failed. Please try again." });
     if (!challengeId || challengeAnswer === undefined) return res.status(400).json({ error: "Email, password and security check are required." });
     if (!consumeLoginChallenge(String(challengeId), String(challengeAnswer))) return res.status(401).json({ error: "Security check failed. Please complete a new challenge." });
   }
@@ -369,18 +376,19 @@ app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) =>
   if(source.status!=="ACTIVE")return res.status(400).json({error:"This account cannot make transfers."});
   const beneficiary=await prisma.beneficiary.findFirst({where:{id:body.beneficiaryId,customerId:customer.id}});
   if(!beneficiary)return res.status(404).json({error:"Beneficiary not found."});
-  if(beneficiary.currency!==source.currency)return res.status(400).json({error:"Transfer currency must match the selected account in this prototype."});
+  
   const amountMinor=BigInt(Math.round(amount*100)); if(amountMinor<=0n)return res.status(400).json({error:"Transfer amount is too small."});
   const reference=`RM-${Date.now()}-${randomBytes(4).toString("hex").toUpperCase()}`;
   const description=body.reference?.trim()||`${type} transfer to ${beneficiary.name}`;
+  const conversion=beneficiary.currency!==source.currency;
   const tx=await prisma.$transaction(async db=>{
-    const t=await db.transaction.create({data:{reference,accountId:source.id,type:"TRANSFER",status:"PROCESSING",amountMinor,currency:source.currency,description,metadata:{source:"prototype_transfer",transferType:type,beneficiaryId:beneficiary.id,beneficiary:{name:beneficiary.name,bankName:beneficiary.bankName,country:beneficiary.country,accountNumber:beneficiary.accountNumber,iban:beneficiary.iban,swiftBic:beneficiary.swiftBic}}}});
+    const t=await db.transaction.create({data:{reference,accountId:source.id,type:"TRANSFER",status:"PROCESSING",amountMinor,currency:source.currency,description,metadata:{source:"prototype_transfer",transferType:type,beneficiaryId:beneficiary.id,sourceCurrency:source.currency,targetCurrency:beneficiary.currency,currencyConversion:conversion,conversionFeeNotice:conversion?"Service fee applies and will be confirmed before processing.":null,beneficiary:{name:beneficiary.name,bankName:beneficiary.bankName,country:beneficiary.country,accountNumber:beneficiary.accountNumber,iban:beneficiary.iban,swiftBic:beneficiary.swiftBic}}}});
     await db.transferPin.update({where:{id:pin.id},data:{failedAttempts:0,lockedUntil:null}});
     return t;
   });
   await audit(session.userId,"CREATE_TRANSFER","TRANSACTION",reference);
   await prisma.securityEvent.create({data:{userId:session.userId,event:"TRANSFER_PROCESSING",metadata:{reference,transferType:type,amount,currency:source.currency}}});
-  res.status(201).json({ok:true,reference,status:"PROCESSING",message:"Transfer received and is processing. Please contact customer care for assistance."});
+  res.status(201).json({ok:true,reference,status:"PROCESSING",currencyConversion:conversion,message:conversion?"Transfer received. Currency conversion service fee applies and will be confirmed before processing.":"Transfer received and is processing. Please contact customer care for assistance."});
 });
 
 app.post("/api/admin/customers/:customerId/transfer-pin", requireRole("ADMIN"), async (req, res) => {
