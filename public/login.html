@@ -55,9 +55,7 @@
           <div class="challenge-box"><span id="challengeQuestion">Loading…</span><span class="challenge-equals">Answer</span></div>
           <input id="challengeAnswer" name="challengeAnswer" inputmode="numeric" autocomplete="off" placeholder="Enter your answer" required>
           <input id="challengeId" name="challengeId" type="hidden">
-          <input id="recaptchaToken" name="recaptchaToken" type="hidden">
-          <input id="recaptchaToken" name="recaptchaToken" type="hidden">
-        </div>
+          </div>
         <button class="button login-button" type="submit"><span>Sign in securely</span><span aria-hidden="true">→</span></button>
         <p id="message" class="form-message" role="alert"></p>
       </form>
@@ -66,10 +64,6 @@
         <span>New client?</span>
         <a href="/registration-unavailable.html">Registration is handled by customer care.</a>
       </div>
-
-      <aside class="login-security-notice" role="note"><strong>Security reminder</strong><span>Rocher will never ask for your password, card PIN, CVV, full card details, or one-time security code by email, social media, or an unsolicited message.</span><a href="/security.html">Learn how to spot phishing →</a></aside>
-
-      <aside class="login-security-notice" role="note"><strong>Security reminder</strong><span>Rocher will never ask for your password, card PIN, CVV, full card details, or one-time security code by email, social media, or an unsolicited message.</span><a href="/security.html">Learn how to spot phishing →</a></aside>
 
       <div class="login-assurance">
         <span class="assurance-mark">✓</span>
@@ -84,46 +78,6 @@
 const passwordToggle=document.querySelector("#passwordToggle");
 const passwordInput=document.querySelector("#passwordInput");
 if(passwordToggle&&passwordInput){passwordToggle.addEventListener("click",()=>{const visible=passwordInput.type==="text";passwordInput.type=visible?"password":"text";passwordToggle.textContent=visible?"Show":"Hide";passwordToggle.setAttribute("aria-label",visible?"Show password":"Hide password");});}
-let recaptchaReady=false;
-async function loadRecaptcha(){
-  try{
-    const response=await fetch("/api/security-config",{cache:"no-store"});
-    const config=await response.json();
-    if(!config.recaptchaEnabled||!config.recaptchaSiteKey) return;
-    window.recaptchaSiteKey=config.recaptchaSiteKey;
-    await new Promise((resolve,reject)=>{
-      const script=document.createElement("script");
-      script.src="https://www.google.com/recaptcha/api.js?render="+encodeURIComponent(config.recaptchaSiteKey);
-      script.async=true; script.defer=true; script.onload=resolve; script.onerror=reject;
-      document.head.appendChild(script);
-    });
-    recaptchaReady=true;
-  }catch{}
-}
-async function getRecaptchaToken(){
-  if(!recaptchaReady||!window.grecaptcha) return "";
-  return await window.grecaptcha.execute(window.recaptchaSiteKey,{action:"login"});
-}
-let recaptchaReady=false;
-async function loadRecaptcha(){
-  try{
-    const response=await fetch("/api/security-config",{cache:"no-store"});
-    const config=await response.json();
-    if(!config.recaptchaEnabled||!config.recaptchaSiteKey) return;
-    window.recaptchaSiteKey=config.recaptchaSiteKey;
-    await new Promise((resolve,reject)=>{
-      const script=document.createElement("script");
-      script.src="https://www.google.com/recaptcha/api.js?render="+encodeURIComponent(config.recaptchaSiteKey);
-      script.async=true; script.defer=true; script.onload=resolve; script.onerror=reject;
-      document.head.appendChild(script);
-    });
-    recaptchaReady=true;
-  }catch{}
-}
-async function getRecaptchaToken(){
-  if(!recaptchaReady||!window.grecaptcha) return "";
-  return await window.grecaptcha.execute(window.recaptchaSiteKey,{action:"login"});
-}
 const question=document.querySelector("#challengeQuestion");
 const challengeId=document.querySelector("#challengeId");
 const challengeAnswer=document.querySelector("#challengeAnswer");
@@ -142,7 +96,6 @@ async function loadChallenge(){
   finally{ refreshChallenge.disabled=false; }
 }
 refreshChallenge.addEventListener("click",loadChallenge);
-loadRecaptcha();
 loadChallenge();
 </script>
 <script src="/js/login.js?v=20260921"></script>
