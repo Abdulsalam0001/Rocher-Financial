@@ -43,7 +43,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"], baseUri: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"], formAction: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       frameSrc: ["'self'"], connectSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https://images.unsplash.com"], styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"]
@@ -357,10 +357,11 @@ app.get("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (_req, res
 
 app.post("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (req, res) => {
   const session = res.locals.session as { userId: string };
+  try {
   const customer = await prisma.customer.findUnique({ where: { userId: session.userId }, select: { id: true } });
   if (!customer) return res.status(404).json({ error: "Customer not found." });
 
-  const body = req.body as {
+  const body = (req.body ?? {}) as {
     name?: string; bankName?: string; country?: string; currency?: string;
     accountNumber?: string; iban?: string; swiftBic?: string; bankAddress?: string; transferType?: string;
   };
@@ -381,12 +382,16 @@ app.post("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (req, res
   const beneficiary = await prisma.beneficiary.create({
     data: {
       customerId: customer.id, name, bankName, country, currency, accountNumber,
-      iban: body.iban?.trim() || null, swiftBic: body.swiftBic?.trim().toUpperCase() || null,
-      bankAddress: body.bankAddress?.trim() || null, transferType
+      iban: String(body.iban ?? "").trim() || null, swiftBic: String(body.swiftBic ?? "").trim().toUpperCase() || null,
+      bankAddress: String(body.bankAddress ?? "").trim() || null, transferType
     }
   });
   await audit(session.userId, "CREATE_BENEFICIARY", "BENEFICIARY", beneficiary.id);
   res.status(201).json(beneficiary);
+  } catch (error) {
+    console.error("BENEFICIARY_CREATE_ERROR", error);
+    res.status(500).json({ error: "We could not save this beneficiary. Please try again." });
+  }
 });
 
 app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) => {
