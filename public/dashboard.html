@@ -6,6 +6,11 @@
 <link rel="canonical" href="https://rocherfinancial.cfd/dashboard.html"><title>Private Client | Rocher Mutuel Financial</title>
 <link rel="stylesheet" href="/css/app.css?v=20260923">
 <link rel="stylesheet" href="/css/dashboard.css?v=20260927">
+<style>
+  /* Balance presentation: keep customer email and balance-status details out of the hero. */
+  #email { display:none !important; }
+  .wealth-bottom { display:none !important; }
+</style>
 </head>
 <body class="client-app">
 <aside class="desktop-sidebar" aria-label="Customer banking navigation">
@@ -97,11 +102,6 @@
     <div class="panel-head"><div><p class="eyebrow">ACCOUNTS</p><h2>Accounts & balances</h2></div><span class="section-note">EUR · USD · GBP · CHF</span></div>
     <div id="accountsGrid" class="account-grid"></div>
   </section>
-
-
-  </section>
-
-
 </main>
 
 <div class="modal-backdrop hidden" id="transferModal">
