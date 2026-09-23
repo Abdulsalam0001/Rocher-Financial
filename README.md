@@ -183,7 +183,7 @@ GET /health
 Example:
 
 ```text
-https://rocher-financial.onrender.com/health
+https://rocherfinancial.cfd/health
 ```
 
 The endpoint returns a lightweight JSON health response without requiring authentication.
@@ -195,7 +195,7 @@ For the Render free-tier deployment, an external uptime monitor can periodically
 The current recommended monitor is:
 
 ```text
-https://rocher-financial.onrender.com/health
+https://rocherfinancial.cfd/health
 ```
 
 Configure the monitor to check approximately every **5 minutes**.
