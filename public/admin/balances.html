@@ -5,7 +5,16 @@
 <main class="dash"><section class="welcome"><p class="eyebrow">ACCOUNT OPERATIONS</p><h1>Balances.</h1><p class="muted">Review customer balances and record controlled credit or debit adjustments.</p></section>
 <section class="stat-grid balance-stats"><article class="stat"><span>Total accounts</span><strong id="accountCount">—</strong></article><article class="stat"><span>Total credits</span><strong id="creditCount">—</strong></article><article class="stat"><span>Total debits</span><strong id="debitCount">—</strong></article><article class="stat"><span>Balance records</span><strong id="historyCount">—</strong></article></section>
 <section class="panel"><div class="panel-head"><div><p class="eyebrow">BALANCE ADJUSTMENT</p><h2>Add credit or debit</h2></div></div>
-<form id="balanceForm" class="create-form balance-form"><select name="accountId" id="accountId" required><option value="">Select account</option></select><select name="direction" required><option value="CREDIT">Credit</option><option value="DEBIT">Debit</option></select><input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required><input name="description" placeholder="Description / reason"><button class="button" type="submit">Post adjustment</button><p id="balanceMessage" class="form-message"></p></form></section>
+<form id="balanceForm" class="create-form balance-form">
+<select name="accountId" id="accountId" required><option value="">Select account</option></select>
+<select name="direction" required><option value="CREDIT">Credit</option><option value="DEBIT">Debit</option></select>
+<input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
+<input name="effectiveAt" id="effectiveAt" type="datetime-local" title="Transaction date and time" aria-label="Transaction date and time">
+<input name="description" placeholder="Description / reason">
+<button class="button" type="submit">Post adjustment</button>
+<p class="form-hint">Use the date field to place the transaction in a user's historical activity. Leave it as now for a normal adjustment.</p>
+<p id="balanceMessage" class="form-message"></p>
+</form></section>
 <section class="panel"><div class="panel-head"><div><p class="eyebrow">ACCOUNT BALANCES</p><h2>Customer accounts</h2></div></div><div class="table-wrap"><table><thead><tr><th>Customer</th><th>Account</th><th>Type</th><th>Currency</th><th>Balance</th><th>Status</th></tr></thead><tbody id="accounts"></tbody></table></div></section>
 <section class="panel"><div class="panel-head"><div><p class="eyebrow">CREDIT & DEBIT HISTORY</p><h2>Balance activity</h2></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Customer</th><th>Account</th><th>Type</th><th>Amount</th><th>Description</th><th>Status</th></tr></thead><tbody id="history"></tbody></table></div></section></main>
 <script src="/js/balances.js"></script></body></html>
