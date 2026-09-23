@@ -67,7 +67,9 @@
     const account=(S.data?.accounts||[]).find(a=>a.id===accountId),beneficiary=S.bens.find(b=>b.id===beneficiaryId),amount=Number($("#transferAmount")?.value||0);
     const box=$("#transferPreview");if(!box)return;
     if(!account||!beneficiary){box.innerHTML="<span>Add a beneficiary to begin.</span>";return}
-    box.innerHTML=`<span>From <b>${esc(account.currency)} · ${esc(account.accountNumber)}</b></span><span>To <b>${esc(beneficiary.name)}</b></span><span>Bank <b>${esc(beneficiary.bankName)}</b></span>${beneficiary.iban?`<span>IBAN <b>${esc(beneficiary.iban)}</b></span>`:""}${beneficiary.swiftBic?`<span>SWIFT/BIC <b>${esc(beneficiary.swiftBic)}</b></span>`:""}${amount?`<span>Amount <b>${money(amount*100,account.currency)}</b></span>`:""}${beneficiary.currency!==account.currency?`<span class="transfer-warning">Currency mismatch: ${esc(beneficiary.currency)} beneficiary / ${esc(account.currency)} account</span>`:""}`;
+    const conversion=beneficiary.currency!==account.currency;
+    box.innerHTML=`<span>From <b>${esc(account.currency)} · ${esc(account.accountNumber)}</b></span><span>To <b>${esc(beneficiary.name)}</b></span><span>Bank <b>${esc(beneficiary.bankName)}</b></span>${beneficiary.iban?`<span>IBAN <b>${esc(beneficiary.iban)}</b></span>`:""}${beneficiary.swiftBic?`<span>SWIFT/BIC <b>${esc(beneficiary.swiftBic)}</b></span>`:""}${amount?`<span>Amount <b>${money(amount*100,account.currency)}</b></span>`:""}${conversion?`<span class="transfer-warning">Currency conversion: ${esc(account.currency)} → ${esc(beneficiary.currency)}</span>`:""}`;
+    const fee=$("#transferFeeNotice");if(fee){fee.classList.toggle("hidden",!conversion);fee.innerHTML=conversion?`<strong>Currency conversion service fee applies</strong>A service fee will be deducted from the source account for the ${esc(account.currency)} → ${esc(beneficiary.currency)} conversion. The applicable charge will be shown/confirmed before processing.`:"";}
   };
   const openTransfer=(type,bid)=>{
     if(!S.data){setDashboardStatus("Your banking data is still loading.","loading");return}
@@ -99,10 +101,11 @@
     const account=(S.data?.accounts||[]).find(a=>a.id===$("#sourceAccount")?.value),beneficiary=S.bens.find(b=>b.id===$("#beneficiary")?.value),amount=Number($("#transferAmount")?.value);
     const message=$("#transferMessage");
     if(!account||!beneficiary||amount<=0){if(message)message.textContent="Complete the transfer details.";return}
-    if(beneficiary.currency!==account.currency){if(message)message.textContent=`The beneficiary uses ${beneficiary.currency}; select a ${beneficiary.currency} source account.`;return}
+    
     if(amount*100>Number(account.balanceMinor)){if(message)message.textContent="The transfer amount exceeds the available balance.";return}
-    S.pending={sourceAccountId:account.id,beneficiaryId:beneficiary.id,transferType:$("#transferType").value,amount,reference:$("#transferReference").value.trim()};
-    $("#confirmationSummary").innerHTML=`<div><span>Method</span><strong>${esc(S.pending.transferType)}</strong></div><div><span>From</span><strong>${esc(account.currency)} · ${esc(account.accountNumber)}</strong></div><div><span>Beneficiary</span><strong>${esc(beneficiary.name)}</strong></div><div><span>Bank</span><strong>${esc(beneficiary.bankName)}</strong></div><div><span>Amount</span><strong>${money(amount*100,account.currency)}</strong></div>`;
+    S.pending={sourceAccountId:account.id,beneficiaryId:beneficiary.id,transferType:$("#transferType").value,amount,reference:$("#transferReference").value.trim(),sourceCurrency:account.currency,targetCurrency:beneficiary.currency};
+    const conversion=beneficiary.currency!==account.currency;
+    $("#confirmationSummary").innerHTML=`<div><span>Method</span><strong>${esc(S.pending.transferType)}</strong></div><div><span>From</span><strong>${esc(account.currency)} · ${esc(account.accountNumber)}</strong></div><div><span>Beneficiary</span><strong>${esc(beneficiary.name)}</strong></div><div><span>Bank</span><strong>${esc(beneficiary.bankName)}</strong></div><div><span>Amount</span><strong>${money(amount*100,account.currency)}</strong></div>${conversion?`<div class="conversion-confirmation"><span>Currency conversion</span><strong>${esc(account.currency)} → ${esc(beneficiary.currency)}</strong><small>A currency-conversion service fee will be deducted from the source account before processing. The applicable charge will be confirmed before processing.</small></div>`:""}`;
     $("#transferPin").value="";$("#confirmMessage").textContent="";modal("#transferModal",false);modal("#confirmModal",true);setTimeout(()=>$("#transferPin")?.focus(),50);
   });
   $("#confirmForm")?.addEventListener("submit",async e=>{
