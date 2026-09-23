@@ -111,7 +111,14 @@
     <form id="transferForm">
       <label>Transfer method<select id="transferType" name="transferType"><option value="SWIFT">SWIFT · International</option><option value="SEPA">SEPA · EUR</option><option value="WIRE">WIRE · Global</option><option value="INTERNAL">INTERNAL · Rocher</option></select></label>
       <label>From account<select id="sourceAccount" name="sourceAccount" required></select></label>
-      <label>Beneficiary<select id="beneficiary" name="beneficiary" required></select></label>
+      <label>Recipient type<select id="beneficiary" name="beneficiary" required></select></label>
+      <div id="oneTimeRecipientFields" class="one-time-recipient hidden">
+        <div class="form-row"><label>Recipient name<input id="recipientName" autocomplete="off" placeholder="Full recipient name"></label><label>Country<input id="recipientCountry" autocomplete="country" placeholder="Country"></label></div>
+        <div class="form-row"><label>Bank name<input id="recipientBankName" autocomplete="organization" placeholder="Bank name"></label><label>Currency<select id="recipientCurrency"><option value="">Select currency</option></select></label></div>
+        <label>Account number<input id="recipientAccountNumber" autocomplete="off" placeholder="Account number"></label>
+        <div class="form-row"><label>IBAN<input id="recipientIban" placeholder="Optional IBAN"></label><label>SWIFT / BIC<input id="recipientSwiftBic" placeholder="Optional SWIFT/BIC"></label></div>
+        <label>Bank address<input id="recipientBankAddress" placeholder="Optional bank address"></label>
+      </div>
       <div class="form-row"><label>Amount<input id="transferAmount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"></label><label>Reference<input id="transferReference" name="reference" maxlength="80" placeholder="Optional reference"></label></div>
       <div id="transferPreview" class="transfer-preview"></div>
       <div id="transferFeeNotice" class="transfer-fee-notice hidden" role="note"></div>
@@ -144,6 +151,6 @@
   </div>
 </div>
 <div class="modal-backdrop hidden" id="alertModal"><div class="modal compact"><button class="modal-close" data-close-modal="alertModal" type="button">×</button><p class="eyebrow" id="alertEyebrow">ROCHER MUTUEL FINANCIAL</p><h2 id="alertTitle">Notice</h2><p class="muted" id="alertMessage"></p><button class="button" data-close-modal="alertModal" type="button">Continue</button></div></div>
-<script src="/js/dashboard.js?v=20260923"></script><script src="/js/banking.js?v=20260925"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/dist/sweetalert2.all.min.js"></script><script src="/js/alerts.js?v=20260926"></script><script src="/js/dashboard.js?v=20260923"></script><script src="/js/banking.js?v=20260926"></script>
 </body>
 </html>
