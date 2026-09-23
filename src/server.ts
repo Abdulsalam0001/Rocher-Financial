@@ -9,11 +9,14 @@ import { PrismaClient } from "@prisma/client";
 
 const app = express();
 app.set("trust proxy", 1);
+app.set("trust proxy", 1);
 const port = Number(process.env.PORT ?? 3000);
 const prisma = new PrismaClient();
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../public");
 const secret = process.env.SESSION_SECRET ?? "prototype-session-secret";
 const cookieName = "rm_session";
+const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY?.trim();
+const recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY?.trim();
 
 const loginChallenges = new Map<string, { answer: string; expiresAt: number }>();
 
@@ -38,8 +41,20 @@ function consumeLoginChallenge(id: string, answer: string) {
 }
 
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"], baseUri: ["'self'"], objectSrc: ["'none'"], frameAncestors: ["'none'"], formAction: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.google.com/recaptcha/", "https://www.gstatic.com/recaptcha/"],
+      frameSrc: ["'self'", "https://www.google.com/recaptcha/"], connectSrc: ["'self'", "https://www.google.com/recaptcha/"],
+      imgSrc: ["'self'", "data:", "https://images.unsplash.com"], styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"]
+    }
+  },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  crossOriginEmbedderPolicy: false
+}));
+app.use(express.json({ limit: "32kb" }));
 app.use(morgan("combined"));
 app.use(express.static(publicDir));
 
@@ -80,6 +95,19 @@ function setSession(res: Response, userId: string, role: "CUSTOMER" | "ADMIN") {
   res.setHeader("Set-Cookie", `${cookieName}=${tokenFor(userId, role)}; HttpOnly; Path=/; SameSite=Lax${secure}`);
 }
 
+const authAttempts = new Map<string, { count: number; resetAt: number }>();
+function allowAuthAttempt(key: string) {
+  const now=Date.now(), current=authAttempts.get(key);
+  if(!current||current.resetAt<=now){authAttempts.set(key,{count:1,resetAt:now+600000});return true;}
+  if(current.count>=12)return false; current.count++; return true;
+}
+async function verifyRecaptcha(token: string|undefined, req: Request) {
+  if(!recaptchaSecret||!recaptchaSiteKey)return true;
+  if(!token)return false;
+  const body=new URLSearchParams({secret:recaptchaSecret,response:token});
+  const forwarded=req.headers["x-forwarded-for"]; if(typeof forwarded==="string")body.set("remoteip",forwarded.split(",")[0].trim());
+  try{const response=await fetch("https://www.google.com/recaptcha/api/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});const result=await response.json() as {success?:boolean};return result.success===true;}catch{return false;}
+}
 function requireRole(role: "CUSTOMER" | "ADMIN") {
   return (req: Request, res: Response, next: NextFunction) => {
     const session = sessionFrom(req);
@@ -93,6 +121,8 @@ async function audit(userId: string, action: string, resource: string, resourceI
   await prisma.auditLog.create({ data: { userId, action, resource, resourceId } });
 }
 
+app.get("/api/security-config", (_req, res) => { res.setHeader("Cache-Control","no-store"); res.json({recaptchaEnabled:Boolean(recaptchaSecret&&recaptchaSiteKey),recaptchaSiteKey:recaptchaSiteKey??null}); });
+
 app.get("/api/auth/login-challenge", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json(createLoginChallenge());
@@ -103,9 +133,11 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/api/auth/login", async (req, res) => {
-  const { email, password, area, challengeId, challengeAnswer } = req.body as { email?: string; password?: string; area?: "customer" | "admin"; challengeId?: string; challengeAnswer?: string };
+  const { email, password, area, challengeId, challengeAnswer, recaptchaToken } = req.body as { email?: string; password?: string; area?: "customer" | "admin"; challengeId?: string; challengeAnswer?: string; recaptchaToken?: string };
   if (!email || !password || !area) return res.status(400).json({ error: "Email, password and login area are required." });
+  if (!allowAuthAttempt(req.ip || "unknown")) return res.status(429).json({ error: "Too many login attempts. Please wait a few minutes and try again." });
   if (area === "customer") {
+    if (!(await verifyRecaptcha(recaptchaToken, req))) return res.status(401).json({ error: "Security verification failed. Please try again." });
     if (!challengeId || challengeAnswer === undefined) return res.status(400).json({ error: "Email, password and security check are required." });
     if (!consumeLoginChallenge(String(challengeId), String(challengeAnswer))) return res.status(401).json({ error: "Security check failed. Please complete a new challenge." });
   }
