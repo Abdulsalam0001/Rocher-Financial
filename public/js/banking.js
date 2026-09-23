@@ -44,13 +44,14 @@
     const accounts=Array.isArray(S.data?.accounts)?S.data.accounts:[];
     const transactions=Array.isArray(S.data?.transactions)?S.data.transactions:[];
     const primary=accounts[0];
-    const primaryTotal=primary?Number(S.data?.balancesByCurrency?.[primary.currency]??accounts.filter(a=>a.currency===primary.currency).reduce((sum,a)=>sum+Number(a.balanceMinor||0),0)):0;
+    const primaryCurrency=S.data?.availableBalanceCurrency||primary?.currency||"EUR";
+    const primaryTotal=Number(S.data?.availableBalanceMinor??primary?.balanceMinor??0);
     const grid=$("#accountsGrid");
     if(grid)grid.innerHTML=accounts.length?accounts.map(a=>`<article class="account-card"><div class="account-card-top"><span class="label">${esc(a.type)}</span><span class="account-status">${esc(a.status)}</span></div><h3>${esc(a.currency)} ACCOUNT</h3><div class="balance">${S.hide?"••••••":money(a.balanceMinor,a.currency)}</div><div class="account-number">${esc(a.accountNumber)}</div></article>`).join(""):`<div class="empty-state">No accounts are currently available. Please contact customer care.</div>`;
     if($("#welcome"))$("#welcome").textContent=`Welcome, ${S.data?.customer?.firstName||"Client"}.`;
     if($("#email"))$("#email").textContent=S.data?.customer?.email||"";
-    if($("#totalBalance"))$("#totalBalance").textContent=S.hide?"••••••":money(primaryTotal,primary?.currency||"EUR");
-    if($("#availableCash"))$("#availableCash").textContent=S.hide?"••••••":money(primaryTotal,primary?.currency||"EUR");
+    if($("#totalBalance"))$("#totalBalance").textContent=S.hide?"••••••":money(primaryTotal,primaryCurrency);
+    if($("#availableCash"))$("#availableCash").textContent=S.hide?"••••••":money(primaryTotal,primaryCurrency);
     if($("#accountCount"))$("#accountCount").textContent=String(accounts.length);
     if($("#baseCurrency"))$("#baseCurrency").textContent=primary?.currency||"EUR";
     if($("#primaryAccount"))$("#primaryAccount").textContent=primary?`${primary.currency} · ${primary.accountNumber}`:"Primary account";
