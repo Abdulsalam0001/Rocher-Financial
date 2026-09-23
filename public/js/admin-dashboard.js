@@ -28,13 +28,13 @@ passwordForm.addEventListener("submit",async e=>{
   e.preventDefault();
   if(!passwordCustomerId)return;
   const body=Object.fromEntries(new FormData(e.currentTarget));
-  if(body.newPassword!==body.confirmPassword){passwordMessage.textContent="Passwords do not match.";return}
+  if(body.newPassword!==body.confirmPassword){passwordMessage.textContent="Passwords do not match.";RMAlert?.warning("Passwords do not match","Enter the same new password in both fields.");return}
   passwordMessage.textContent="Changing password…";
   const r=await fetch("/api/admin/customers/"+encodeURIComponent(passwordCustomerId)+"/password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({newPassword:body.newPassword})});
   if(r.status===401){location.href="/admin/login.html";return}
   const j=await r.json();
   passwordMessage.textContent=r.ok?j.message:(j.error||"Unable to change password.");
-  if(r.ok){e.currentTarget.reset();setTimeout(()=>document.querySelector("#cancelPasswordChange").click(),900);await load()}
+  if(r.ok){RMAlert?.success("Password changed",j.message);e.currentTarget.reset();setTimeout(()=>document.querySelector("#cancelPasswordChange").click(),900);await load()}
 });
 
 async function loadCurrencySettings(){
@@ -52,8 +52,8 @@ document.querySelector("#currencySettingsForm")?.addEventListener("submit",async
     const response=await fetch("/api/admin/currencies",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currencies:e.currentTarget.currencies.value})});
     const data=await response.json();
     if(!response.ok)throw new Error(data.error||"Unable to save currencies.");
-    if(message)message.textContent="Supported currencies updated.";
-  }catch(error){if(message)message.textContent=error.message||"Unable to save currencies."}
+    if(message)message.textContent="Supported currencies updated.";RMAlert?.success("Currencies updated","Customer beneficiary and account currency options have been updated.");
+  }catch(error){if(message)message.textContent=error.message||"Unable to save currencies.";RMAlert?.error("Currency update failed",error.message||"Unable to save currencies.")}
   finally{if(button)button.disabled=false;}
 });
 loadCurrencySettings();
