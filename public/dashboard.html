@@ -93,15 +93,11 @@
     </section>
   </section>
 
-  <section id="activity" class="panel">
+  <section id="activity" class="panel dashboard-history-panel">
     <div class="panel-head"><div><p class="eyebrow">ACTIVITY</p><h2>Recent transactions</h2></div><span class="section-note">Latest 10</span></div>
     <div class="table-wrap"><table><thead><tr><th>Amount</th><th>Description</th><th>Date</th><th>Reference</th><th>Status</th></tr></thead><tbody id="transactions"></tbody></table></div>
   </section>
 
-  <footer class="client-footer">
-    <div><strong>ROCHER FINANCIAL</strong><span>Private client banking · Digital access</span></div>
-    <nav><a href="/contact.html">Customer care</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/security.html">Security</a></nav>
-  </footer>
 </main>
 
 <div class="modal-backdrop hidden" id="transferModal">
@@ -114,6 +110,7 @@
       <label>Beneficiary<select id="beneficiary" name="beneficiary" required></select></label>
       <div class="form-row"><label>Amount<input id="transferAmount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"></label><label>Reference<input id="transferReference" name="reference" maxlength="80" placeholder="Optional reference"></label></div>
       <div id="transferPreview" class="transfer-preview"></div>
+      <div id="transferFeeNotice" class="transfer-fee-notice hidden" role="note"></div>
       <button class="button transfer-submit" type="submit"><span>Review transfer</span><strong>→</strong></button>
       <p id="transferMessage" class="form-message"></p>
     </form>
@@ -125,7 +122,7 @@
     <button class="modal-close" data-close-modal="confirmModal" type="button">×</button>
     <p class="eyebrow">FINAL CONFIRMATION</p><h2>Confirm transfer</h2>
     <div id="confirmationSummary" class="confirmation-summary"></div>
-    <form id="confirmForm"><label>Transfer PIN<input id="transferPin" inputmode="numeric" pattern="\d{6}" maxlength="6" type="password" placeholder="••••••" autocomplete="one-time-code" required></label><button class="button" type="submit">Confirm & send</button><p id="confirmMessage" class="form-message"></p></form>
+    <form id="confirmForm"><label>Transfer PIN<input id="transferPin" inputmode="numeric" pattern="\d{6}" maxlength="6" type="password" placeholder="••••••" autocomplete="one-time-code" required></label><button class="button" type="submit">Confirm & send</button><p class="transfer-pin-support">Need a Transfer PIN or help with your PIN? Email <a href="mailto:support@rocher-financial.onrender.com">support@rocher-financial.onrender.com</a>.</p><p id="confirmMessage" class="form-message"></p></form>
   </div>
 </div>
 
@@ -133,7 +130,7 @@
   <div class="modal"><button class="modal-close" data-close-modal="beneficiaryModal" type="button">×</button><p class="eyebrow">RECIPIENT</p><h2>Add beneficiary</h2><p class="muted">Save a recipient for future prototype transfers.</p>
     <form id="beneficiaryForm">
       <div class="form-row"><label>Name<input name="name" required placeholder="Beneficiary name"></label><label>Country<input name="country" required placeholder="Monaco"></label></div>
-      <div class="form-row"><label>Bank name<input name="bankName" required placeholder="Bank name"></label><label>Currency<select name="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option></select></label></div>
+      <div class="form-row"><label>Bank name<input name="bankName" required placeholder="Bank name"></label><label>Currency<select name="currency"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option><option>NGN</option><option>CAD</option><option>AUD</option></select></label></div>
       <label>Account number<input name="accountNumber" required placeholder="Account number"></label>
       <div class="form-row"><label>IBAN<input name="iban" placeholder="Optional IBAN"></label><label>SWIFT / BIC<input name="swiftBic" placeholder="Optional SWIFT/BIC"></label></div>
       <label>Bank address<input name="bankAddress" placeholder="Optional bank address"></label>
