@@ -8,6 +8,7 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypt
 import { PrismaClient } from "@prisma/client";
 
 const app = express();
+app.set("trust proxy", 1);
 const port = Number(process.env.PORT ?? 3000);
 const prisma = new PrismaClient();
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../public");
