@@ -11,7 +11,8 @@
     const timer=setTimeout(()=>controller.abort(),12000);
     try{
       const requestOptions={credentials:"same-origin",...options,signal:controller.signal};
-      if(requestOptions.body && typeof requestOptions.body!=="string"){requestOptions.body=JSON.stringify(requestOptions.body);requestOptions.headers={"Content-Type":"application/json",...(requestOptions.headers||{})};}\n      else if(typeof requestOptions.body==="string" && !Object.keys(requestOptions.headers||{}).some(k=>k.toLowerCase()==="content-type")){requestOptions.headers={"Content-Type":"application/json",...(requestOptions.headers||{})};}
+      if(requestOptions.body && typeof requestOptions.body!=="string"){requestOptions.body=JSON.stringify(requestOptions.body);requestOptions.headers={"Content-Type":"application/json",...(requestOptions.headers||{})};}
+      else if(typeof requestOptions.body==="string" && !Object.keys(requestOptions.headers||{}).some(k=>k.toLowerCase()==="content-type")){requestOptions.headers={"Content-Type":"application/json",...(requestOptions.headers||{})};}
       const response=await fetch(url,requestOptions);
       const raw=await response.text();
       let data={};try{data=raw?JSON.parse(raw):{}}catch{}
