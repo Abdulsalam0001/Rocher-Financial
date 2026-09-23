@@ -396,8 +396,8 @@ app.post("/api/customer/beneficiaries", requireRole("CUSTOMER"), async (req, res
 
 app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) => {
   const session = res.locals.session as { userId: string };
-  const body = req.body as { sourceAccountId?: string; beneficiaryId?: string; amount?: string|number; transferType?: string; transferPin?: string; reference?: string };
-  if (!body.sourceAccountId || !body.beneficiaryId || body.amount === undefined || !body.transferPin) return res.status(400).json({ error:"Source account, beneficiary, amount and Transfer PIN are required." });
+  const body = (req.body ?? {}) as { sourceAccountId?: string; beneficiaryId?: string; amount?: string|number; transferType?: string; transferPin?: string; reference?: string; recipientName?: string; recipientBankName?: string; recipientCountry?: string; recipientCurrency?: string; recipientAccountNumber?: string; recipientIban?: string; recipientSwiftBic?: string; recipientBankAddress?: string };
+  if (!body.sourceAccountId || body.amount === undefined || !body.transferPin) return res.status(400).json({ error:"Source account, amount and Transfer PIN are required." });
   const type=String(body.transferType??"WIRE").toUpperCase();
   if(!validTransferType(type)) return res.status(400).json({error:"Unsupported transfer type."});
   const amount=Number(body.amount); if(!Number.isFinite(amount)||amount<=0) return res.status(400).json({error:"Transfer amount must be greater than zero."});
@@ -410,20 +410,31 @@ app.post("/api/customer/transfers", requireRole("CUSTOMER"), async (req, res) =>
   const source=customer.accounts.find(h=>h.account.id===body.sourceAccountId)?.account;
   if(!source)return res.status(404).json({error:"Source account not found."});
   if(source.status!=="ACTIVE")return res.status(400).json({error:"This account cannot make transfers."});
-  const beneficiary=await prisma.beneficiary.findFirst({where:{id:body.beneficiaryId,customerId:customer.id}});
-  if(!beneficiary)return res.status(404).json({error:"Beneficiary not found."});
+  const beneficiaryId=String(body.beneficiaryId??"").trim();
+  let recipient:{id:string|null;name:string;bankName:string;country:string;currency:string;accountNumber:string;iban:string|null;swiftBic:string|null;bankAddress:string|null};
+  if(beneficiaryId && beneficiaryId!=="ONE_TIME"){
+    const saved=await prisma.beneficiary.findFirst({where:{id:beneficiaryId,customerId:customer.id}});
+    if(!saved)return res.status(404).json({error:"Beneficiary not found."});
+    recipient={id:saved.id,name:saved.name,bankName:saved.bankName,country:saved.country,currency:saved.currency,accountNumber:saved.accountNumber,iban:saved.iban,swiftBic:saved.swiftBic,bankAddress:saved.bankAddress};
+  }else{
+    const name=String(body.recipientName??"").trim(),bankName=String(body.recipientBankName??"").trim(),country=String(body.recipientCountry??"").trim(),currency=String(body.recipientCurrency??"").trim().toUpperCase(),accountNumber=String(body.recipientAccountNumber??"").trim();
+    if(!name||!bankName||!country||!currency||!accountNumber)return res.status(400).json({error:"One-time recipient name, bank, country, currency and account number are required."});
+    const supportedCurrencies=await getSupportedCurrencies();
+    if(!supportedCurrencies.includes(currency))return res.status(400).json({error:"That recipient currency is not currently enabled by administration."});
+    recipient={id:null,name,bankName,country,currency,accountNumber,iban:String(body.recipientIban??"").trim()||null,swiftBic:String(body.recipientSwiftBic??"").trim().toUpperCase()||null,bankAddress:String(body.recipientBankAddress??"").trim()||null};
+  }
   
   const amountMinor=BigInt(Math.round(amount*100)); if(amountMinor<=0n)return res.status(400).json({error:"Transfer amount is too small."});
   const reference=`RM-${Date.now()}-${randomBytes(4).toString("hex").toUpperCase()}`;
-  const description=body.reference?.trim()||`${type} transfer to ${beneficiary.name}`;
-  const conversion=beneficiary.currency!==source.currency;
+  const description=body.reference?.trim()||`${type} transfer to ${recipient.name}`;
+  const conversion=recipient.currency!==source.currency;
   const tx=await prisma.$transaction(async db=>{
-    const t=await db.transaction.create({data:{reference,accountId:source.id,type:"TRANSFER",status:"PROCESSING",amountMinor,currency:source.currency,description,metadata:{source:"prototype_transfer",transferType:type,beneficiaryId:beneficiary.id,sourceCurrency:source.currency,targetCurrency:beneficiary.currency,currencyConversion:conversion,conversionFeeNotice:conversion?"Service fee applies and will be confirmed before processing.":null,beneficiary:{name:beneficiary.name,bankName:beneficiary.bankName,country:beneficiary.country,accountNumber:beneficiary.accountNumber,iban:beneficiary.iban,swiftBic:beneficiary.swiftBic}}}});
+    const t=await db.transaction.create({data:{reference,accountId:source.id,type:"TRANSFER",status:"PROCESSING",amountMinor,currency:source.currency,description,metadata:{source:"prototype_transfer",transferType:type,beneficiaryId:recipient.id,oneTimeRecipient:recipient.id===null,sourceCurrency:source.currency,targetCurrency:recipient.currency,currencyConversion:conversion,conversionFeeNotice:conversion?"Service fee applies and will be confirmed before processing.":null,beneficiary:{name:recipient.name,bankName:recipient.bankName,country:recipient.country,accountNumber:recipient.accountNumber,iban:recipient.iban,swiftBic:recipient.swiftBic,bankAddress:recipient.bankAddress}}}});
     await db.transferPin.update({where:{id:pin.id},data:{failedAttempts:0,lockedUntil:null}});
     return t;
   });
   await audit(session.userId,"CREATE_TRANSFER","TRANSACTION",reference);
-  await prisma.securityEvent.create({data:{userId:session.userId,event:"TRANSFER_PROCESSING",metadata:{reference,transferType:type,amount,currency:source.currency}}});
+  await prisma.securityEvent.create({data:{userId:session.userId,event:"TRANSFER_PROCESSING",metadata:{reference,transferType:type,amount,currency:source.currency,oneTimeRecipient:recipient.id===null}}});
   res.status(201).json({ok:true,reference,status:"PROCESSING",currencyConversion:conversion,message:conversion?"Transfer received. Currency conversion service fee applies and will be confirmed before processing.":"Transfer received and is processing. Please contact customer care for assistance."});
 });
 
