@@ -515,3 +515,5 @@ td{border-top-color:#e4e9ed}
 .balance-date-field{display:grid;gap:8px;color:var(--navy);font-size:11px;font-weight:800}
 .balance-date-field input{margin-top:0}
 @media(max-width:1000px){.balance-date-field{min-width:0}}
+
+.dashboard-history-panel{margin-top:18px}.dashboard-history-panel .table-wrap{max-height:460px}.transfer-fee-notice{margin-top:12px;padding:13px 15px;border:1px solid rgba(201,155,78,.42);background:#fbf7ec;color:var(--navy);font-size:12px;line-height:1.55}.transfer-fee-notice.hidden{display:none}.transfer-fee-notice strong{display:block;margin-bottom:3px}.transfer-pin-support{font-size:11px;line-height:1.6;color:var(--muted);margin:0}.transfer-pin-support a{color:var(--navy);font-weight:800}.wealth-grid{margin-bottom:12px}.stat-grid.premium-stats{margin-top:0}.client-footer{display:none!important}@media(min-width:851px){.dashboard-history-panel{margin-top:18px}.dashboard-history-panel .table-wrap{overflow-y:auto}}@media(max-width:850px){.dashboard-history-panel{margin-top:16px}.dashboard-history-panel .table-wrap{max-height:none}}
