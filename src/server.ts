@@ -278,6 +278,10 @@ app.get("/api/customer/me", requireRole("CUSTOMER"), async (_req, res) => {
         balanceMinor: account.balanceMinor.toString()
       })),
       balancesByCurrency,
+      // Keep the primary available balance explicit for the customer dashboard.
+      // The UI should not have to infer the displayed balance from the currency map.
+      availableBalanceMinor: accounts[0]?.balanceMinor.toString() ?? "0",
+      availableBalanceCurrency: accounts[0]?.currency ?? null,
       transactions: transactions.map((transaction) => ({
         reference: transaction.reference,
         type: transaction.type,
