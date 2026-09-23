@@ -9,7 +9,7 @@
 <select name="accountId" id="accountId" required><option value="">Select account</option></select>
 <select name="direction" required><option value="CREDIT">Credit</option><option value="DEBIT">Debit</option></select>
 <input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
-<input name="effectiveAt" id="effectiveAt" type="datetime-local" title="Transaction date and time" aria-label="Transaction date and time">
+<label class="balance-date-field">Transaction date & time (optional)<input name="effectiveAt" id="effectiveAt" type="datetime-local" title="Transaction date and time"></label>
 <input name="description" placeholder="Description / reason">
 <button class="button" type="submit">Post adjustment</button>
 <p class="form-hint">Use the date field to place the transaction in a user's historical activity. Leave it as now for a normal adjustment.</p>
