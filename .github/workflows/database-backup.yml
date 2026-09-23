@@ -1,0 +1,77 @@
+name: Rocher Database Backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rocher-database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Backup production database
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check required secrets
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          test -n "$DATABASE_URL" || { echo "DATABASE_URL secret is missing"; exit 1; }
+          test -n "$BACKUP_PASSPHRASE" || { echo "BACKUP_PASSPHRASE secret is missing"; exit 1; }
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client gnupg
+
+      - name: Create database backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          FILE="backup/rocher-$(date -u +'%Y-%m-%d_%H-%M-%S').dump"
+
+          pg_dump "$DATABASE_URL" \
+            --format=custom \
+            --no-owner \
+            --no-acl \
+            --file="$FILE"
+
+          test -s "$FILE"
+          echo "Backup created: $FILE"
+
+      - name: Encrypt backup
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          for file in backup/*.dump; do
+            gpg --batch --yes --pinentry-mode loopback \
+              --passphrase "$BACKUP_PASSPHRASE" \
+              --symmetric --cipher-algo AES256 \
+              --output "$file.gpg" "$file"
+            rm "$file"
+          done
+
+      - name: Verify encrypted backup
+        run: |
+          set -euo pipefail
+          test -n "$(find backup -type f -name '*.gpg' -print -quit)"
+          ls -lh backup/
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocher-database-backup-${{ github.run_id }}
+          path: backup/*.gpg
+          if-no-files-found: error
+          retention-days: 30
