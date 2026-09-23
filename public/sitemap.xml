@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>/</loc></url>
-  <url><loc>/contact.html</loc></url>
-  <url><loc>/security.html</loc></url>
-  <url><loc>/registration-unavailable.html</loc></url>
+  <url><loc>https://rocher-financial.onrender.com/</loc></url>
+  <url><loc>https://rocher-financial.onrender.com/contact.html</loc></url>
+  <url><loc>https://rocher-financial.onrender.com/security.html</loc></url>
+  <url><loc>https://rocher-financial.onrender.com/registration-unavailable.html</loc></url>
 </urlset>
