@@ -607,3 +607,22 @@ td{border-top-color:#e4e9ed}
   .client-app .modal form select{min-height:56px;padding:0 15px}
   .client-app .modal form textarea{min-height:100px}
 }
+
+/* Prominent, touch-friendly customer actions */
+.admin-app #customersPanel td:nth-child(6){width:220px;min-width:220px}
+.admin-app .customer-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.admin-app .customer-actions .change-password,.admin-app .customer-actions .delete-customer{min-height:44px;padding:10px 14px;border-radius:5px;font-weight:800;font-size:11px;line-height:1;white-space:nowrap;cursor:pointer}
+.admin-app .customer-actions .change-password{background:var(--navy);border:1px solid var(--navy);color:#fff}
+.admin-app .customer-actions .delete-customer{background:#fff5f4;border:1px solid #c94a45;color:#a52f2a;box-shadow:0 2px 7px rgba(165,47,42,.08)}
+.admin-app .customer-actions .delete-customer:hover,.admin-app .customer-actions .delete-customer:focus-visible{background:#a52f2a;border-color:#a52f2a;color:#fff}
+.admin-app .customer-actions .change-password:hover,.admin-app .customer-actions .change-password:focus-visible{filter:brightness(.94)}
+.admin-app .customer-actions button:focus-visible{outline:3px solid rgba(11,95,145,.22);outline-offset:2px}
+@media(max-width:850px){
+.admin-app #customersPanel td:nth-child(6){width:190px;min-width:190px}
+.admin-app .customer-actions{flex-direction:column;align-items:stretch;gap:7px}
+.admin-app .customer-actions button{width:100%;min-height:46px}
+}
+@media(max-width:520px){
+.admin-app #customersPanel table{min-width:700px}
+.admin-app #customersPanel td:nth-child(6){width:180px;min-width:180px}
+}
