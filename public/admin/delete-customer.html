@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Delete Customer | Rocher Mutuel Financial</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/dist/sweetalert2.all.min.js"></script>
+<script src="/js/alerts.js?v=20260926"></script>
+</head>
+<body class="admin-app">
+<header class="dash-header">
+  <a class="auth-brand" href="/admin/dashboard.html"><span>RM</span><div>ROCHER MUTUEL<small>ADMINISTRATION</small></div></a>
+  <button id="mobileNavToggle" class="mobile-nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <nav class="admin-nav">
+    <a href="/admin/dashboard.html">Overview</a>
+    <a href="/admin/create-user.html">Create user</a>
+    <a href="/admin/transfer-pin.html">Transfer PIN</a>
+    <a href="/admin/balances.html">Balances</a>
+    <a href="/admin/delete-customer.html" aria-current="page">Delete customer</a>
+    <a href="/admin/dashboard.html#history">History</a>
+  </nav>
+  <button id="logout" class="ghost">Log out</button>
+</header>
+<main class="dash">
+  <section class="welcome">
+    <p class="eyebrow">CUSTOMER MANAGEMENT</p>
+    <h1>Delete a customer.</h1>
+    <p class="muted">Permanently remove a customer and the account records connected to them.</p>
+  </section>
+
+  <section class="panel delete-customer-panel">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow danger-eyebrow">DESTRUCTIVE ACTION</p>
+        <h2>Delete customer</h2>
+        <p class="muted">This action cannot be undone. Select the customer carefully before continuing.</p>
+      </div>
+      <a class="button small" href="/admin/dashboard.html">Back to dashboard</a>
+    </div>
+
+    <form id="deleteCustomerForm" class="delete-customer-form">
+      <label class="delete-customer-field">
+        <span>Customer</span>
+        <select id="customerId" required>
+          <option value="">Loading customers…</option>
+        </select>
+      </label>
+
+      <div id="customerDetails" class="customer-delete-card hidden">
+        <div><span>Name</span><strong id="customerName">—</strong></div>
+        <div><span>Email</span><strong id="customerEmail">—</strong></div>
+        <div><span>Account</span><strong id="customerAccount">—</strong></div>
+        <div><span>Balance</span><strong id="customerBalance">—</strong></div>
+      </div>
+
+      <label id="confirmationWrap" class="delete-customer-field hidden">
+        <span>Type <strong>DELETE</strong> to confirm</span>
+        <input id="deleteConfirmation" type="text" autocomplete="off" autocapitalize="characters" placeholder="DELETE">
+      </label>
+
+      <div class="delete-warning">
+        <strong>Permanent deletion</strong>
+        <span>The customer, linked account records, and related customer data will be removed according to the existing administration delete operation.</span>
+      </div>
+
+      <button id="deleteCustomerButton" class="delete-customer-page-button" type="submit" disabled>Delete customer</button>
+      <p id="deleteCustomerMessage" class="form-message" role="status"></p>
+    </form>
+  </section>
+</main>
+<script src="/js/mobile-nav.js"></script>
+<script src="/js/delete-customer.js"></script>
+</body>
+</html>
