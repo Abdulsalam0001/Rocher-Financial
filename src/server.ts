@@ -197,6 +197,26 @@ app.post("/api/customer/change-password", requireRole("CUSTOMER"), async (req, r
   res.json({ ok: true, message: "Password changed successfully." });
 });
 
+app.delete("/api/admin/customers/:customerId", requireRole("ADMIN"), async (req, res) => {
+  const session = res.locals.session as { userId: string };
+  const customerId = String(req.params.customerId);
+  const customer = await prisma.customer.findUnique({ where: { id: customerId }, include: { user: { select: { id: true, staff: true } }, accounts: { include: { account: true } } } });
+  if (!customer) return res.status(404).json({ error: "Customer not found." });
+  if (customer.user.staff) return res.status(400).json({ error: "Staff accounts cannot be deleted from customer management." });
+  await prisma.$transaction(async tx => {
+    const accountIds = customer.accounts.map(h => h.accountId);
+    if (accountIds.length) {
+      await tx.ledgerEntry.deleteMany({ where: { accountId: { in: accountIds } } });
+      await tx.transaction.deleteMany({ where: { accountId: { in: accountIds } } });
+      await tx.account.deleteMany({ where: { id: { in: accountIds } } });
+    }
+    await tx.customer.delete({ where: { id: customerId } });
+    await tx.user.delete({ where: { id: customer.user.id } });
+  });
+  await audit(session.userId, "DELETE_CUSTOMER", "CUSTOMER", customerId);
+  res.json({ ok: true, message: "Customer and associated account records deleted." });
+});
+
 app.post("/api/admin/customers/:customerId/password", requireRole("ADMIN"), async (req, res) => {
   const session = res.locals.session as { userId: string };
   const { customerId } = req.params;
