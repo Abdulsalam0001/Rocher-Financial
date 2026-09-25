@@ -210,7 +210,11 @@ app.delete("/api/admin/customers/:customerId", requireRole("ADMIN"), async (req,
       await tx.transaction.deleteMany({ where: { accountId: { in: accountIds } } });
       await tx.account.deleteMany({ where: { id: { in: accountIds } } });
     }
-    await tx.beneficiary.deleteMany({ where: { customerId } });\n    const loans = await tx.loan.findMany({ where: { customerId }, select: { id: true } });\n    if (loans.length) { await tx.loanPayment.deleteMany({ where: { loanId: { in: loans.map(x => x.id) } } }); await tx.loan.deleteMany({ where: { customerId } }); }\n    await tx.investment.deleteMany({ where: { customerId } });\n    await tx.customer.delete({ where: { id: customerId } });
+    await tx.beneficiary.deleteMany({ where: { customerId } });
+const loans = await tx.loan.findMany({ where: { customerId }, select: { id: true } });
+if (loans.length) { await tx.loanPayment.deleteMany({ where: { loanId: { in: loans.map(x => x.id) } } }); await tx.loan.deleteMany({ where: { customerId } }); }
+await tx.investment.deleteMany({ where: { customerId } });
+await tx.customer.delete({ where: { id: customerId } });
     await tx.user.delete({ where: { id: customer.user.id } });
   });
   await audit(session.userId, "DELETE_CUSTOMER", "CUSTOMER", customerId);
